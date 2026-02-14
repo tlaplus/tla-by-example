@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>TLC Worker</title>
+  <script src="https://cjrtnc.leaningtech.com/4.2/loader.js"></script>
+</head>
+<body>
+<script>
+  let TlcRunnerClass = null;
+  let initError = null;
+  let capturing = false;
+
+  // Intercept console.log to capture CheerpJ's System.out output during TLC runs
+  const origLog = console.log;
+  console.log = function(...args) {
+    origLog.apply(console, args);
+    if (capturing) {
+      const msg = args.map(a => String(a)).join(" ");
+      // Filter out CheerpJ internal noise, forward TLC-relevant lines
+      if (msg.startsWith("TODO:") || msg.includes("cheerpOS")) return;
+      parent.postMessage({ type: "progress", line: msg }, "*");
+    }
+  };
+
+  async function init() {
+    try {
+      await cheerpjInit({
+        status: "none",
+        version: 11,
+        javaProperties: [
+          "java.awt.headless=true",
+          "com.sun.management.jmxremote=false",
+        ],
+      });
+      // Resolve jar path relative to this HTML file's location
+      const jarPath = `/app${location.pathname.replace(/\/[^/]*$/, '')}/tlaplus-web-cheerpj.jar`;
+      const lib = await cheerpjRunLibrary(jarPath);
+      TlcRunnerClass = await lib.me.fponzi.tlaplusweb.TlcRunner;
+      parent.postMessage({ type: "ready" }, "*");
+    } catch (e) {
+      initError = e;
+      parent.postMessage({ type: "error", message: "Init failed: " + e.message }, "*");
+    }
+  }
+
+  window.addEventListener("message", async (event) => {
+    if (event.data && event.data.type === "run") {
+      if (!TlcRunnerClass) {
+        parent.postMessage({
+          type: "result",
+          output: "Error: CheerpJ not initialized." + (initError ? " " + initError.message : ""),
+        }, "*");
+        return;
+      }
+      try {
+        const { spec, cfg, workers, checkDeadlock } = event.data;
+        capturing = true;
+        const result = await TlcRunnerClass.run(spec, cfg, workers, checkDeadlock);
+        capturing = false;
+        const output = result ? String(result) : "TLC completed but produced no output.";
+        parent.postMessage({ type: "result", output }, "*");
+      } catch (e) {
+        capturing = false;
+        parent.postMessage({ type: "result", output: "Error running TLC: " + e.message }, "*");
+      }
+    }
+  });
+
+  init();
+</script>
+</body>
+</html>

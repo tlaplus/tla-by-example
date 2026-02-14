@@ -1,24 +1,67 @@
 import { Lesson } from "@/lib/lessons";
 
 const lesson: Lesson = {
-  slug: "v08a-view",
-  title: "View Abstraction",
+  slug: "safety",
+  title: "Safety — Detecting Deadlocks",
   section: "blocking-queue",
-  commitSha: "02119f46",
-  commitUrl: "https://github.com/lemmy/BlockingQueue/commit/02119f46",
-  description: `Define a **view** that abstracts the buffer into a counter, reducing the state space.
+  commitSha: "ce99d16a",
+  commitUrl: "https://github.com/lemmy/BlockingQueue/commit/ce99d16a",
+  description: `Now we add an **invariant** to automatically detect deadlocks instead of manually inspecting the state graph.
 
 ## What Changed
 
-A VIEW directive is added to the configuration. The view maps each state to an abstract state, so TLC treats states with the same abstract view as equivalent.
+An Invariant definition was added to the spec, and INVARIANT was added to the configuration.
 
-## Why Views Help
+## The Deadlock Invariant
 
-The buffer content does not matter for deadlock checking — only its length does. By abstracting the buffer to its length, we dramatically reduce the state space while preserving the properties we care about.
+The invariant checks that the system is never in a state where all threads are waiting. If every producer and consumer is in the wait set, nobody can make progress.
 
-We exploit the insight that the order of elements in the (fifo) buffer is irrelevant for the correctness of the algorithm. In other words, we can abstract the buffer into a simple counter of elements. With this abstraction, the state-space for the current config shrinks from 2940 to 1797 distinct states.`,
+## Key Concept: Safety Properties
+
+A **safety property** says "something bad never happens." Invariants are the primary way to express safety in TLA+. TLC checks that the invariant holds in every reachable state.
+
+## TLC Output
+
+TLC now finds the deadlock for configuration p1c2b1:
+
+\`\`\`
+Error: Invariant Invariant is violated.
+State 1: <Initial predicate>
+/\\ buffer = <<>>
+/\\ waitSet = {}
+
+State 2:
+/\\ buffer = <<>>
+/\\ waitSet = {c1}
+
+State 3:
+/\\ buffer = <<>>
+/\\ waitSet = {c1, c2}
+
+State 4:
+/\\ buffer = <<p1>>
+/\\ waitSet = {c2}
+
+State 5:
+/\\ buffer = <<p1>>
+/\\ waitSet = {p1, c2}
+
+State 6:
+/\\ buffer = <<>>
+/\\ waitSet = {p1}
+
+State 7:
+/\\ buffer = <<>>
+/\\ waitSet = {p1, c1}
+
+State 8:
+/\\ buffer = <<>>
+/\\ waitSet = {p1, c1, c2}
+\`\`\`
+
+Note that the Java app with p2c1b1 usually deadlocks only after thousands of log statements, which is considerably longer than the error trace above. This makes it more difficult to understand the root cause.`,
   spec: `--------------------------- MODULE BlockingQueue ---------------------------
-EXTENDS Naturals, Sequences, FiniteSets, TLC
+EXTENDS Naturals, Sequences, FiniteSets
 
 CONSTANTS Producers,   (* the (nonempty) set of producers                       *)
           Consumers,   (* the (nonempty) set of consumers                       *)
@@ -32,10 +75,10 @@ ASSUME Assumption ==
        
 -----------------------------------------------------------------------------
 
-VARIABLES buffer, waitSet, producers, consumers, bufCapacity
-vars == <<buffer, waitSet, producers, consumers, bufCapacity>>
+VARIABLES buffer, waitSet
+vars == <<buffer, waitSet>>
 
-RunningThreads == (producers \\cup consumers) \\ waitSet
+RunningThreads == (Producers \\cup Consumers) \\ waitSet
 
 (* @see java.lang.Object#notify *)       
 Notify == IF waitSet # {}
@@ -49,10 +92,10 @@ Wait(t) == /\\ waitSet' = waitSet \\cup {t}
 -----------------------------------------------------------------------------
 
 Put(t, d) ==
-   \\/ /\\ Len(buffer) < bufCapacity
+   \\/ /\\ Len(buffer) < BufCapacity
       /\\ buffer' = Append(buffer, d)
       /\\ Notify
-   \\/ /\\ Len(buffer) = bufCapacity
+   \\/ /\\ Len(buffer) = BufCapacity
       /\\ Wait(t)
       
 Get(t) ==
@@ -67,46 +110,32 @@ Get(t) ==
 (* Initially, the buffer is empty and no thread is waiting. *)
 Init == /\\ buffer = <<>>
         /\\ waitSet = {}
-        /\\ producers \\in (SUBSET Producers) \\ {{}}
-        /\\ consumers \\in (SUBSET Consumers) \\ {{}}
-        /\\ bufCapacity \\in 1..BufCapacity
 
 (* Then, pick a thread out of all running threads and have it do its thing. *)
-Next == 
-    /\\  UNCHANGED <<producers, consumers, bufCapacity>>
-    /\\ \\E t \\in RunningThreads: \\/ /\\ t \\in producers
+Next == \\E t \\in RunningThreads: \\/ /\\ t \\in Producers
                                     /\\ Put(t, t) \\* Add some data to buffer
-                                 \\/ /\\ t \\in consumers
+                                 \\/ /\\ t \\in Consumers
                                     /\\ Get(t)
 
 -----------------------------------------------------------------------------
 
 (* TLA+ is untyped, thus lets verify the range of some values in each state. *)
 TypeInv == /\\ buffer \\in Seq(Producers)
-           /\\ Len(buffer) \\in 0..bufCapacity
-           /\\ waitSet \\subseteq (producers \\cup consumers)
+           /\\ Len(buffer) \\in 0..BufCapacity
+           /\\ waitSet \\subseteq (Producers \\cup Consumers)
 
 (* No Deadlock *)
-Invariant == IF waitSet # (producers \\cup consumers)
-             THEN TRUE \\* Inv not violated.
-             ELSE PrintT(<<"InvVio", bufCapacity, Cardinality(producers \\cup consumers)>>) /\\ FALSE
+Invariant == waitSet # (Producers \\cup Consumers)
 
-(* The Permutations operator is defined in the TLC module. *)
-Sym == Permutations(Producers) \\union Permutations(Consumers)
-
-View == <<Len(buffer), waitSet, producers, consumers, bufCapacity>>
 =============================================================================`,
   cfg: `\\* SPECIFICATION
 CONSTANTS
     BufCapacity = 3
     Producers = {p1,p2,p3,p4}
-    Consumers = {c1,c2,c3,c4}
+    Consumers = {c1,c2,c3}
 
 INIT Init
 NEXT Next
-
-SYMMETRY Sym
-VIEW View
 
 INVARIANT Invariant
 INVARIANT TypeInv`,

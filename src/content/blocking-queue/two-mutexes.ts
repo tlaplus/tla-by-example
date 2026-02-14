@@ -1,7 +1,7 @@
 import { Lesson } from "@/lib/lessons";
 
 const lesson: Lesson = {
-  slug: "v13-two-mutexes",
+  slug: "two-mutexes",
   title: "Two Mutexes",
   section: "blocking-queue",
   commitSha: "a400b585",

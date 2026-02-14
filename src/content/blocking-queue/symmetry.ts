@@ -1,28 +1,24 @@
 import { Lesson } from "@/lib/lessons";
 
 const lesson: Lesson = {
-  slug: "v08-inequation",
-  title: "Deadlock-Free Inequation",
+  slug: "symmetry",
+  title: "Symmetry Sets",
   section: "blocking-queue",
-  commitSha: "8e536cba",
-  commitUrl: "https://github.com/lemmy/BlockingQueue/commit/8e536cba",
-  description: `Now we infer the **inequation** under which the system is deadlock-free.
+  commitSha: "553287fd",
+  commitUrl: "https://github.com/lemmy/BlockingQueue/commit/553287fd",
+  description: `We declare Producers and Consumers as **symmetry sets** to dramatically reduce the state space.
 
 ## What Changed
 
-The spec and config are extended to systematically check when the deadlock invariant holds and when it does not.
+The configuration now uses SYMMETRY to tell TLC that individual producer/consumer identities do not matter — only the count matters.
 
-## Key Insight
+## Why Symmetry Matters
 
-TLC finds that the system is deadlock-free when BufCapacity >= (Producers + Consumers - 1). This is a precise characterization discovered through model checking.
+Without symmetry, TLC treats "p1 waiting, p2 running" and "p2 waiting, p1 running" as different states. With symmetry, they are equivalent. This can reduce the state space by orders of magnitude.
 
-We run TLC with the \`-continue\` option to not stop state space exploration after a violation has been found, asking TLC to find all violations. A bit of analysis reveals that BlockingQueue is deadlock-free iff \`2*BufCapacity >= Cardinality(Producers \\\\union Consumers)\`.
+TLC can take advantage of symmetry sets to reduce the number of distinct states it has to examine from 57254 to 1647!
 
-![ContinueInequation](/bq-images/ContinueInequation.svg)
-
-Collecting even more data, we can correlate the length of the error trace with the constants:
-
-![TraceLengthCorrelation](/bq-images/TraceLengthCorrelation.svg)`,
+An expression is symmetric for a set S if and only if interchanging any two values of S does not change the value of the expression. You should declare a set S of model values to be a symmetry set only if the specification and all properties you are checking are symmetric for S. Note that symmetry sets should not be used when checking liveness properties.`,
   spec: `--------------------------- MODULE BlockingQueue ---------------------------
 EXTENDS Naturals, Sequences, FiniteSets, TLC
 
@@ -93,9 +89,7 @@ TypeInv == /\\ buffer \\in Seq(Producers)
            /\\ waitSet \\subseteq (producers \\cup consumers)
 
 (* No Deadlock *)
-Invariant == IF waitSet # (producers \\cup consumers)
-             THEN TRUE \\* Inv not violated.
-             ELSE PrintT(<<"InvVio", bufCapacity, Cardinality(producers \\cup consumers)>>) /\\ FALSE
+Invariant == waitSet # (producers \\cup consumers)
 
 (* The Permutations operator is defined in the TLC module. *)
 Sym == Permutations(Producers) \\union Permutations(Consumers)
@@ -105,7 +99,7 @@ Sym == Permutations(Producers) \\union Permutations(Consumers)
 CONSTANTS
     BufCapacity = 3
     Producers = {p1,p2,p3,p4}
-    Consumers = {c1,c2,c3,c4}
+    Consumers = {c1,c2,c3}
 
 INIT Init
 NEXT Next

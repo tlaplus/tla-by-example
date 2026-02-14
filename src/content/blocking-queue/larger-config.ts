@@ -1,7 +1,7 @@
 import { Lesson } from "@/lib/lessons";
 
 const lesson: Lesson = {
-  slug: "v03-larger-config",
+  slug: "larger-config",
   title: "Larger Configuration",
   section: "blocking-queue",
   commitSha: "7d05fdfa",

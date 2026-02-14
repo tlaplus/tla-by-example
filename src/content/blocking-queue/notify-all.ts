@@ -1,65 +1,28 @@
 import { Lesson } from "@/lib/lessons";
 
 const lesson: Lesson = {
-  slug: "v05-safety",
-  title: "Safety — Detecting Deadlocks",
+  slug: "notify-all",
+  title: "Notify All",
   section: "blocking-queue",
-  commitSha: "ce99d16a",
-  commitUrl: "https://github.com/lemmy/BlockingQueue/commit/ce99d16a",
-  description: `Now we add an **invariant** to automatically detect deadlocks instead of manually inspecting the state graph.
+  commitSha: "a81e4914",
+  commitUrl: "https://github.com/lemmy/BlockingQueue/commit/a81e4914",
+  description: `Another bugfix: switch from notify() to notifyAll() — always wake up all waiting threads.
 
 ## What Changed
 
-An Invariant definition was added to the spec, and INVARIANT was added to the configuration.
+Instead of non-deterministically notifying one thread, we now notify **all** waiting threads. This is the standard fix for the lost-wakeup problem.
 
-## The Deadlock Invariant
+## The Lost Wakeup Problem
 
-The invariant checks that the system is never in a state where all threads are waiting. If every producer and consumer is in the wait set, nobody can make progress.
+With notify(), the JVM might wake up a thread that cannot make progress (e.g., waking a producer when the buffer is already full). That thread goes back to waiting, and the actual thread that could make progress is never woken — leading to deadlock.
 
-## Key Concept: Safety Properties
+## The Fix
 
-A **safety property** says "something bad never happens." Invariants are the primary way to express safety in TLA+. TLC checks that the invariant holds in every reachable state.
+notifyAll() ensures every waiting thread gets a chance to check whether it can proceed.
 
-## TLC Output
+As a bonus exercise, check if it is necessary to notify all waiting threads in both Put and Get.
 
-TLC now finds the deadlock for configuration p1c2b1:
-
-\`\`\`
-Error: Invariant Invariant is violated.
-State 1: <Initial predicate>
-/\\ buffer = <<>>
-/\\ waitSet = {}
-
-State 2:
-/\\ buffer = <<>>
-/\\ waitSet = {c1}
-
-State 3:
-/\\ buffer = <<>>
-/\\ waitSet = {c1, c2}
-
-State 4:
-/\\ buffer = <<p1>>
-/\\ waitSet = {c2}
-
-State 5:
-/\\ buffer = <<p1>>
-/\\ waitSet = {p1, c2}
-
-State 6:
-/\\ buffer = <<>>
-/\\ waitSet = {p1}
-
-State 7:
-/\\ buffer = <<>>
-/\\ waitSet = {p1, c1}
-
-State 8:
-/\\ buffer = <<>>
-/\\ waitSet = {p1, c1, c2}
-\`\`\`
-
-Note that the Java app with p2c1b1 usually deadlocks only after thousands of log statements, which is considerably longer than the error trace above. This makes it more difficult to understand the root cause.`,
+Note that this is the proposed solution to the bug in Challenge 14 of the c2 extreme programming wiki. To the best of my knowledge, not a single comment mentions that just one notifyAll suffices. Neither does anybody mention a more elegant fix that has no performance implications (see next step).`,
   spec: `--------------------------- MODULE BlockingQueue ---------------------------
 EXTENDS Naturals, Sequences, FiniteSets
 
@@ -80,10 +43,7 @@ vars == <<buffer, waitSet>>
 
 RunningThreads == (Producers \\cup Consumers) \\ waitSet
 
-(* @see java.lang.Object#notify *)       
-Notify == IF waitSet # {}
-          THEN \\E x \\in waitSet: waitSet' = waitSet \\ {x}
-          ELSE UNCHANGED waitSet
+NotifyAll == waitSet' = {}
 
 (* @see java.lang.Object#wait *)
 Wait(t) == /\\ waitSet' = waitSet \\cup {t}
@@ -94,14 +54,14 @@ Wait(t) == /\\ waitSet' = waitSet \\cup {t}
 Put(t, d) ==
    \\/ /\\ Len(buffer) < BufCapacity
       /\\ buffer' = Append(buffer, d)
-      /\\ Notify
+      /\\ NotifyAll
    \\/ /\\ Len(buffer) = BufCapacity
       /\\ Wait(t)
       
 Get(t) ==
    \\/ /\\ buffer # <<>>
       /\\ buffer' = Tail(buffer)
-      /\\ Notify
+      /\\ NotifyAll
    \\/ /\\ buffer = <<>>
       /\\ Wait(t)
 
@@ -138,7 +98,18 @@ INIT Init
 NEXT Next
 
 INVARIANT Invariant
-INVARIANT TypeInv`,
+INVARIANT TypeInv
+
+CONSTANTS 
+    curBuf <- AliascurBuf
+    nxtBuf <- AliasnxtBuf
+    Waiting <- AliasWaiting
+    Scheduled <- AliasScheduled
+    ConsBuf <- AliasConsBuf
+    
+ALIAS AnimAlias
+
+INVARIANT AnimInv`,
 };
 
 export default lesson;

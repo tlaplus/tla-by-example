@@ -1,28 +1,30 @@
 import { Lesson } from "@/lib/lessons";
 
 const lesson: Lesson = {
-  slug: "v11-notify-nondeterministic",
-  title: "Non-deterministic Notification",
+  slug: "inequation",
+  title: "Deadlock-Free Inequation",
   section: "blocking-queue",
-  commitSha: "ea2a2303",
-  commitUrl: "https://github.com/lemmy/BlockingQueue/commit/ea2a2303",
-  description: `A critical bugfix: the notification mechanism now non-deterministically selects which waiting thread to wake up.
+  commitSha: "8e536cba",
+  commitUrl: "https://github.com/lemmy/BlockingQueue/commit/8e536cba",
+  description: `Now we infer the **inequation** under which the system is deadlock-free.
 
 ## What Changed
 
-Previously, the spec assumed a specific thread would be notified. Now it models the real behavior of notify() in Java: any one of the waiting threads can be selected.
+The spec and config are extended to systematically check when the deadlock invariant holds and when it does not.
 
-## The Bug
+## Key Insight
 
-If we always notify a specific thread, we miss executions where a different thread gets notified — which could lead to deadlock.
+TLC finds that the system is deadlock-free when BufCapacity >= (Producers + Consumers - 1). This is a precise characterization discovered through model checking.
 
-## Key Concept
+We run TLC with the \`-continue\` option to not stop state space exploration after a violation has been found, asking TLC to find all violations. A bit of analysis reveals that BlockingQueue is deadlock-free iff \`2*BufCapacity >= Cardinality(Producers \\\\union Consumers)\`.
 
-When modeling a system, you must capture **all** possible behaviors, not just the ones you expect. Non-determinism is how TLA+ models situations where the system can make any of several choices.
+![ContinueInequation](/bq-images/ContinueInequation.svg)
 
-Non-deterministically notify waiting threads in an attempt to fix the deadlock situation. This attempt fails because we might end up waking the wrong thread up over and over again.`,
+Collecting even more data, we can correlate the length of the error trace with the constants:
+
+![TraceLengthCorrelation](/bq-images/TraceLengthCorrelation.svg)`,
   spec: `--------------------------- MODULE BlockingQueue ---------------------------
-EXTENDS Naturals, Sequences, FiniteSets
+EXTENDS Naturals, Sequences, FiniteSets, TLC
 
 CONSTANTS Producers,   (* the (nonempty) set of producers                       *)
           Consumers,   (* the (nonempty) set of consumers                       *)
@@ -36,10 +38,10 @@ ASSUME Assumption ==
        
 -----------------------------------------------------------------------------
 
-VARIABLES buffer, waitSet
-vars == <<buffer, waitSet>>
+VARIABLES buffer, waitSet, producers, consumers, bufCapacity
+vars == <<buffer, waitSet, producers, consumers, bufCapacity>>
 
-RunningThreads == (Producers \\cup Consumers) \\ waitSet
+RunningThreads == (producers \\cup consumers) \\ waitSet
 
 (* @see java.lang.Object#notify *)       
 Notify == IF waitSet # {}
@@ -53,10 +55,10 @@ Wait(t) == /\\ waitSet' = waitSet \\cup {t}
 -----------------------------------------------------------------------------
 
 Put(t, d) ==
-   \\/ /\\ Len(buffer) < BufCapacity
+   \\/ /\\ Len(buffer) < bufCapacity
       /\\ buffer' = Append(buffer, d)
       /\\ Notify
-   \\/ /\\ Len(buffer) = BufCapacity
+   \\/ /\\ Len(buffer) = bufCapacity
       /\\ Wait(t)
       
 Get(t) ==
@@ -71,48 +73,47 @@ Get(t) ==
 (* Initially, the buffer is empty and no thread is waiting. *)
 Init == /\\ buffer = <<>>
         /\\ waitSet = {}
+        /\\ producers \\in (SUBSET Producers) \\ {{}}
+        /\\ consumers \\in (SUBSET Consumers) \\ {{}}
+        /\\ bufCapacity \\in 1..BufCapacity
 
 (* Then, pick a thread out of all running threads and have it do its thing. *)
-Next ==
-     \\/ Notify /\\ UNCHANGED buffer \\* At each step notify all waiting threads.
-     \\/ \\E t \\in RunningThreads: \\/ /\\ t \\in Producers
+Next == 
+    /\\  UNCHANGED <<producers, consumers, bufCapacity>>
+    /\\ \\E t \\in RunningThreads: \\/ /\\ t \\in producers
                                     /\\ Put(t, t) \\* Add some data to buffer
-                                 \\/ /\\ t \\in Consumers
+                                 \\/ /\\ t \\in consumers
                                     /\\ Get(t)
 
 -----------------------------------------------------------------------------
 
 (* TLA+ is untyped, thus lets verify the range of some values in each state. *)
 TypeInv == /\\ buffer \\in Seq(Producers)
-           /\\ Len(buffer) \\in 0..BufCapacity
-           /\\ waitSet \\subseteq (Producers \\cup Consumers)
+           /\\ Len(buffer) \\in 0..bufCapacity
+           /\\ waitSet \\subseteq (producers \\cup consumers)
 
 (* No Deadlock *)
-Invariant == waitSet # (Producers \\cup Consumers)
+Invariant == IF waitSet # (producers \\cup consumers)
+             THEN TRUE \\* Inv not violated.
+             ELSE PrintT(<<"InvVio", bufCapacity, Cardinality(producers \\cup consumers)>>) /\\ FALSE
+
+(* The Permutations operator is defined in the TLC module. *)
+Sym == Permutations(Producers) \\union Permutations(Consumers)
 
 =============================================================================`,
   cfg: `\\* SPECIFICATION
 CONSTANTS
     BufCapacity = 3
     Producers = {p1,p2,p3,p4}
-    Consumers = {c1,c2,c3}
+    Consumers = {c1,c2,c3,c4}
 
 INIT Init
 NEXT Next
 
+SYMMETRY Sym
+
 INVARIANT Invariant
-INVARIANT TypeInv
-
-CONSTANTS 
-    curBuf <- AliascurBuf
-    nxtBuf <- AliasnxtBuf
-    Waiting <- AliasWaiting
-    Scheduled <- AliasScheduled
-    ConsBuf <- AliasConsBuf
-    
-ALIAS AnimAlias
-
-INVARIANT AnimInv`,
+INVARIANT TypeInv`,
 };
 
 export default lesson;

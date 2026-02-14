@@ -1,22 +1,26 @@
 import { Lesson } from "@/lib/lessons";
 
 const lesson: Lesson = {
-  slug: "v06-variables",
-  title: "Constants to Variables",
+  slug: "notify-nondeterministic",
+  title: "Non-deterministic Notification",
   section: "blocking-queue",
-  commitSha: "d48bd86a",
-  commitUrl: "https://github.com/lemmy/BlockingQueue/commit/d48bd86a",
-  description: `In this step, we convert some constants into variables to explore a wider range of configurations automatically.
+  commitSha: "ea2a2303",
+  commitUrl: "https://github.com/lemmy/BlockingQueue/commit/ea2a2303",
+  description: `A critical bugfix: the notification mechanism now non-deterministically selects which waiting thread to wake up.
 
 ## What Changed
 
-Instead of fixing the buffer capacity as a constant, the spec now allows TLC to explore different values. This lets us check the invariant across many configurations in a single run.
+Previously, the spec assumed a specific thread would be notified. Now it models the real behavior of notify() in Java: any one of the waiting threads can be selected.
 
-## Key Insight
+## The Bug
 
-Converting constants to variables is a powerful technique: it lets TLC explore configurations you might not have thought to check manually.
+If we always notify a specific thread, we miss executions where a different thread gets notified — which could lead to deadlock.
 
-As Michel Charpentier points out, BlockingQueue is deadlock-free under some configurations, but model checking is not helpful with finding the underlying mathematical function. However, we can at least ask TLC to find as many data points as possible. This rewrite increases the complete state space to 57254 distinct states, but TLC continues to find the deadlock behavior.`,
+## Key Concept
+
+When modeling a system, you must capture **all** possible behaviors, not just the ones you expect. Non-determinism is how TLA+ models situations where the system can make any of several choices.
+
+Non-deterministically notify waiting threads in an attempt to fix the deadlock situation. This attempt fails because we might end up waking the wrong thread up over and over again.`,
   spec: `--------------------------- MODULE BlockingQueue ---------------------------
 EXTENDS Naturals, Sequences, FiniteSets
 
@@ -32,10 +36,10 @@ ASSUME Assumption ==
        
 -----------------------------------------------------------------------------
 
-VARIABLES buffer, waitSet, producers, consumers, bufCapacity
-vars == <<buffer, waitSet, producers, consumers, bufCapacity>>
+VARIABLES buffer, waitSet
+vars == <<buffer, waitSet>>
 
-RunningThreads == (producers \\cup consumers) \\ waitSet
+RunningThreads == (Producers \\cup Consumers) \\ waitSet
 
 (* @see java.lang.Object#notify *)       
 Notify == IF waitSet # {}
@@ -49,10 +53,10 @@ Wait(t) == /\\ waitSet' = waitSet \\cup {t}
 -----------------------------------------------------------------------------
 
 Put(t, d) ==
-   \\/ /\\ Len(buffer) < bufCapacity
+   \\/ /\\ Len(buffer) < BufCapacity
       /\\ buffer' = Append(buffer, d)
       /\\ Notify
-   \\/ /\\ Len(buffer) = bufCapacity
+   \\/ /\\ Len(buffer) = BufCapacity
       /\\ Wait(t)
       
 Get(t) ==
@@ -67,27 +71,24 @@ Get(t) ==
 (* Initially, the buffer is empty and no thread is waiting. *)
 Init == /\\ buffer = <<>>
         /\\ waitSet = {}
-        /\\ producers \\in (SUBSET Producers) \\ {{}}
-        /\\ consumers \\in (SUBSET Consumers) \\ {{}}
-        /\\ bufCapacity \\in 1..BufCapacity
 
 (* Then, pick a thread out of all running threads and have it do its thing. *)
-Next == 
-    /\\  UNCHANGED <<producers, consumers, bufCapacity>>
-    /\\ \\E t \\in RunningThreads: \\/ /\\ t \\in producers
+Next ==
+     \\/ Notify /\\ UNCHANGED buffer \\* At each step notify all waiting threads.
+     \\/ \\E t \\in RunningThreads: \\/ /\\ t \\in Producers
                                     /\\ Put(t, t) \\* Add some data to buffer
-                                 \\/ /\\ t \\in consumers
+                                 \\/ /\\ t \\in Consumers
                                     /\\ Get(t)
 
 -----------------------------------------------------------------------------
 
 (* TLA+ is untyped, thus lets verify the range of some values in each state. *)
 TypeInv == /\\ buffer \\in Seq(Producers)
-           /\\ Len(buffer) \\in 0..bufCapacity
-           /\\ waitSet \\subseteq (producers \\cup consumers)
+           /\\ Len(buffer) \\in 0..BufCapacity
+           /\\ waitSet \\subseteq (Producers \\cup Consumers)
 
 (* No Deadlock *)
-Invariant == waitSet # (producers \\cup consumers)
+Invariant == waitSet # (Producers \\cup Consumers)
 
 =============================================================================`,
   cfg: `\\* SPECIFICATION
@@ -100,7 +101,18 @@ INIT Init
 NEXT Next
 
 INVARIANT Invariant
-INVARIANT TypeInv`,
+INVARIANT TypeInv
+
+CONSTANTS 
+    curBuf <- AliascurBuf
+    nxtBuf <- AliasnxtBuf
+    Waiting <- AliasWaiting
+    Scheduled <- AliasScheduled
+    ConsBuf <- AliasConsBuf
+    
+ALIAS AnimAlias
+
+INVARIANT AnimInv`,
 };
 
 export default lesson;

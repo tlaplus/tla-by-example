@@ -1,7 +1,7 @@
 import { Lesson } from "@/lib/lessons";
 
 const lesson: Lesson = {
-  slug: "v04-debug-config",
+  slug: "debug-config",
   title: "Debug State Graph",
   section: "blocking-queue",
   commitSha: "534f3928",

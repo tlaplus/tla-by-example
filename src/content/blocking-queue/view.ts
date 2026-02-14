@@ -1,24 +1,22 @@
 import { Lesson } from "@/lib/lessons";
 
 const lesson: Lesson = {
-  slug: "v07-symmetry",
-  title: "Symmetry Sets",
+  slug: "view",
+  title: "View Abstraction",
   section: "blocking-queue",
-  commitSha: "553287fd",
-  commitUrl: "https://github.com/lemmy/BlockingQueue/commit/553287fd",
-  description: `We declare Producers and Consumers as **symmetry sets** to dramatically reduce the state space.
+  commitSha: "02119f46",
+  commitUrl: "https://github.com/lemmy/BlockingQueue/commit/02119f46",
+  description: `Define a **view** that abstracts the buffer into a counter, reducing the state space.
 
 ## What Changed
 
-The configuration now uses SYMMETRY to tell TLC that individual producer/consumer identities do not matter — only the count matters.
+A VIEW directive is added to the configuration. The view maps each state to an abstract state, so TLC treats states with the same abstract view as equivalent.
 
-## Why Symmetry Matters
+## Why Views Help
 
-Without symmetry, TLC treats "p1 waiting, p2 running" and "p2 waiting, p1 running" as different states. With symmetry, they are equivalent. This can reduce the state space by orders of magnitude.
+The buffer content does not matter for deadlock checking — only its length does. By abstracting the buffer to its length, we dramatically reduce the state space while preserving the properties we care about.
 
-TLC can take advantage of symmetry sets to reduce the number of distinct states it has to examine from 57254 to 1647!
-
-An expression is symmetric for a set S if and only if interchanging any two values of S does not change the value of the expression. You should declare a set S of model values to be a symmetry set only if the specification and all properties you are checking are symmetric for S. Note that symmetry sets should not be used when checking liveness properties.`,
+We exploit the insight that the order of elements in the (fifo) buffer is irrelevant for the correctness of the algorithm. In other words, we can abstract the buffer into a simple counter of elements. With this abstraction, the state-space for the current config shrinks from 2940 to 1797 distinct states.`,
   spec: `--------------------------- MODULE BlockingQueue ---------------------------
 EXTENDS Naturals, Sequences, FiniteSets, TLC
 
@@ -89,22 +87,26 @@ TypeInv == /\\ buffer \\in Seq(Producers)
            /\\ waitSet \\subseteq (producers \\cup consumers)
 
 (* No Deadlock *)
-Invariant == waitSet # (producers \\cup consumers)
+Invariant == IF waitSet # (producers \\cup consumers)
+             THEN TRUE \\* Inv not violated.
+             ELSE PrintT(<<"InvVio", bufCapacity, Cardinality(producers \\cup consumers)>>) /\\ FALSE
 
 (* The Permutations operator is defined in the TLC module. *)
 Sym == Permutations(Producers) \\union Permutations(Consumers)
 
+View == <<Len(buffer), waitSet, producers, consumers, bufCapacity>>
 =============================================================================`,
   cfg: `\\* SPECIFICATION
 CONSTANTS
     BufCapacity = 3
     Producers = {p1,p2,p3,p4}
-    Consumers = {c1,c2,c3}
+    Consumers = {c1,c2,c3,c4}
 
 INIT Init
 NEXT Next
 
 SYMMETRY Sym
+VIEW View
 
 INVARIANT Invariant
 INVARIANT TypeInv`,

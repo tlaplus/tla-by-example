@@ -1,7 +1,7 @@
 import { Lesson } from "@/lib/lessons";
 
 const lesson: Lesson = {
-  slug: "v02-state-graph",
+  slug: "state-graph",
   title: "State Graph (Minimum Config)",
   section: "blocking-queue",
   commitSha: "d21cd0fa",

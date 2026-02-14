@@ -2,8 +2,10 @@ import { Lesson } from "@/lib/lessons";
 
 const lesson: Lesson = {
   slug: "v11-notify-nondeterministic",
-  title: "v11: Non-deterministic Notification",
+  title: "Non-deterministic Notification",
   section: "blocking-queue",
+  commitSha: "ea2a2303",
+  commitUrl: "https://github.com/lemmy/BlockingQueue/commit/ea2a2303",
   description: `A critical bugfix: the notification mechanism now non-deterministically selects which waiting thread to wake up.
 
 ## What Changed
@@ -16,7 +18,9 @@ If we always notify a specific thread, we miss executions where a different thre
 
 ## Key Concept
 
-When modeling a system, you must capture **all** possible behaviors, not just the ones you expect. Non-determinism is how TLA+ models situations where the system can make any of several choices.`,
+When modeling a system, you must capture **all** possible behaviors, not just the ones you expect. Non-determinism is how TLA+ models situations where the system can make any of several choices.
+
+Non-deterministically notify waiting threads in an attempt to fix the deadlock situation. This attempt fails because we might end up waking the wrong thread up over and over again.`,
   spec: `--------------------------- MODULE BlockingQueue ---------------------------
 EXTENDS Naturals, Sequences, FiniteSets
 

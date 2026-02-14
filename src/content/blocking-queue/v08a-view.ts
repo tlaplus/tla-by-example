@@ -2,8 +2,10 @@ import { Lesson } from "@/lib/lessons";
 
 const lesson: Lesson = {
   slug: "v08a-view",
-  title: "v08a: View Abstraction",
+  title: "View Abstraction",
   section: "blocking-queue",
+  commitSha: "02119f46",
+  commitUrl: "https://github.com/lemmy/BlockingQueue/commit/02119f46",
   description: `Define a **view** that abstracts the buffer into a counter, reducing the state space.
 
 ## What Changed
@@ -12,7 +14,9 @@ A VIEW directive is added to the configuration. The view maps each state to an a
 
 ## Why Views Help
 
-The buffer content does not matter for deadlock checking — only its length does. By abstracting the buffer to its length, we dramatically reduce the state space while preserving the properties we care about.`,
+The buffer content does not matter for deadlock checking — only its length does. By abstracting the buffer to its length, we dramatically reduce the state space while preserving the properties we care about.
+
+We exploit the insight that the order of elements in the (fifo) buffer is irrelevant for the correctness of the algorithm. In other words, we can abstract the buffer into a simple counter of elements. With this abstraction, the state-space for the current config shrinks from 2940 to 1797 distinct states.`,
   spec: `--------------------------- MODULE BlockingQueue ---------------------------
 EXTENDS Naturals, Sequences, FiniteSets, TLC
 

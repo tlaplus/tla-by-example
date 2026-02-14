@@ -1,3 +1,9 @@
+export interface ExtraTab {
+  label: string;
+  content: string;
+  language?: string;
+}
+
 export interface Lesson {
   slug: string;
   title: string;
@@ -6,6 +12,9 @@ export interface Lesson {
   spec: string;
   cfg: string;
   tabs?: ("spec" | "cfg")[];
+  extraTabs?: ExtraTab[];
+  commitSha?: string;
+  commitUrl?: string;
 }
 
 export interface LessonNavInfo {

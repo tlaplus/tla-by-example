@@ -6,8 +6,8 @@ describe("Lesson data", () => {
     expect(introLessons).toHaveLength(9);
   });
 
-  it("has 11 blocking queue lessons", () => {
-    expect(blockingQueueLessons).toHaveLength(11);
+  it("has 12 blocking queue lessons", () => {
+    expect(blockingQueueLessons).toHaveLength(12);
   });
 
   it("all intro lessons have unique slugs", () => {

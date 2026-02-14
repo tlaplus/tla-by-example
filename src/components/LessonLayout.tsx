@@ -56,6 +56,7 @@ export default function LessonLayout({ lesson, prev, next, children }: LessonLay
             initialSpec={lesson.spec}
             initialCfg={lesson.cfg}
             tabs={lesson.tabs}
+            extraTabs={lesson.extraTabs}
           />
         </div>
       </div>

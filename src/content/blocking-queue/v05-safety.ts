@@ -2,8 +2,10 @@ import { Lesson } from "@/lib/lessons";
 
 const lesson: Lesson = {
   slug: "v05-safety",
-  title: "v05: Safety — Detecting Deadlocks",
+  title: "Safety — Detecting Deadlocks",
   section: "blocking-queue",
+  commitSha: "ce99d16a",
+  commitUrl: "https://github.com/lemmy/BlockingQueue/commit/ce99d16a",
   description: `Now we add an **invariant** to automatically detect deadlocks instead of manually inspecting the state graph.
 
 ## What Changed
@@ -16,7 +18,48 @@ The invariant checks that the system is never in a state where all threads are w
 
 ## Key Concept: Safety Properties
 
-A **safety property** says "something bad never happens." Invariants are the primary way to express safety in TLA+. TLC checks that the invariant holds in every reachable state.`,
+A **safety property** says "something bad never happens." Invariants are the primary way to express safety in TLA+. TLC checks that the invariant holds in every reachable state.
+
+## TLC Output
+
+TLC now finds the deadlock for configuration p1c2b1:
+
+\`\`\`
+Error: Invariant Invariant is violated.
+State 1: <Initial predicate>
+/\\ buffer = <<>>
+/\\ waitSet = {}
+
+State 2:
+/\\ buffer = <<>>
+/\\ waitSet = {c1}
+
+State 3:
+/\\ buffer = <<>>
+/\\ waitSet = {c1, c2}
+
+State 4:
+/\\ buffer = <<p1>>
+/\\ waitSet = {c2}
+
+State 5:
+/\\ buffer = <<p1>>
+/\\ waitSet = {p1, c2}
+
+State 6:
+/\\ buffer = <<>>
+/\\ waitSet = {p1}
+
+State 7:
+/\\ buffer = <<>>
+/\\ waitSet = {p1, c1}
+
+State 8:
+/\\ buffer = <<>>
+/\\ waitSet = {p1, c1, c2}
+\`\`\`
+
+Note that the Java app with p2c1b1 usually deadlocks only after thousands of log statements, which is considerably longer than the error trace above. This makes it more difficult to understand the root cause.`,
   spec: `--------------------------- MODULE BlockingQueue ---------------------------
 EXTENDS Naturals, Sequences, FiniteSets
 

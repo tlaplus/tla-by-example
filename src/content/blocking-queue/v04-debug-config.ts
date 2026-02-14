@@ -2,13 +2,19 @@ import { Lesson } from "@/lib/lessons";
 
 const lesson: Lesson = {
   slug: "v04-debug-config",
-  title: "v04: Debug State Graph",
+  title: "Debug State Graph",
   section: "blocking-queue",
+  commitSha: "534f3928",
+  commitUrl: "https://github.com/lemmy/BlockingQueue/commit/534f3928",
   description: `A debug configuration with 2 producers, 1 consumer, and buffer capacity 1.
 
 ## What Changed
 
-Again just a configuration change. Different configurations expose different behaviors. The deadlock might be easier or harder to find depending on the number of producers and consumers.`,
+Again just a configuration change. Different configurations expose different behaviors. The deadlock might be easier or harder to find depending on the number of producers and consumers.
+
+With the help of TLCExt!PickSuccessor we build us a debugger with which we study the state graph interactively. We learn that with configuration p2c1b1 there are two deadlock states:
+
+![PickSuccessor](/bq-images/v04-PickSuccessor.gif)`,
   spec: `--------------------------- MODULE BlockingQueue ---------------------------
 (***************************************************************************)
 (* Original problem and spec by Michel Charpentier                         *)

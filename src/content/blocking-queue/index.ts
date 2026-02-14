@@ -1,3 +1,4 @@
+import introduction from "./introduction";
 import v02 from "./v02-state-graph";
 import v03 from "./v03-larger-config";
 import v04 from "./v04-debug-config";
@@ -12,6 +13,7 @@ import v13 from "./v13-two-mutexes";
 import { Lesson } from "@/lib/lessons";
 
 export const blockingQueueLessons: Lesson[] = [
+  introduction,
   v02,
   v03,
   v04,

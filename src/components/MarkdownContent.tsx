@@ -26,6 +26,9 @@ function parseMarkdown(md: string): string {
   html = html.replace(/\*\*(.+?)\*\*/g, '<strong class="font-semibold">$1</strong>');
   html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
 
+  // Images (must be before links)
+  html = html.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" class="my-4 max-w-full rounded-lg border border-gray-200" />');
+
   // Links
   html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" class="text-blue-600 hover:underline" target="_blank" rel="noopener noreferrer">$1</a>');
 

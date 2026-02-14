@@ -2,8 +2,10 @@ import { Lesson } from "@/lib/lessons";
 
 const lesson: Lesson = {
   slug: "v03-larger-config",
-  title: "v03: Larger Configuration",
+  title: "Larger Configuration",
   section: "blocking-queue",
+  commitSha: "7d05fdfa",
+  commitUrl: "https://github.com/lemmy/BlockingQueue/commit/7d05fdfa",
   description: `We now use a slightly different configuration (1 producer, 2 consumers, buffer capacity 1) which lets us visually spot the deadlock.
 
 ## What Changed
@@ -12,7 +14,17 @@ Only the configuration changed — the spec is the same. This demonstrates the p
 
 ## Try It
 
-Run TLC and notice how the state space grows compared to v02.`,
+Run TLC and notice how the state space grows compared to v02.
+
+## State Graph
+
+Slightly larger configuration with which we can visually spot the deadlock:
+
+![State graph p1c2b1](/bq-images/p1c2b1.svg)
+
+BlockingQueueDebug.tla/.cfg shows how to interactively explore a state graph with TLC in combination with GraphViz:
+
+![Explore state graph](/bq-images/v03-StateGraph.gif)`,
   spec: `--------------------------- MODULE BlockingQueue ---------------------------
 (***************************************************************************)
 (* Original problem and spec by Michel Charpentier                         *)

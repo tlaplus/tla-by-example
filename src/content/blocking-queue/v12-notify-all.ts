@@ -2,8 +2,10 @@ import { Lesson } from "@/lib/lessons";
 
 const lesson: Lesson = {
   slug: "v12-notify-all",
-  title: "v12: Notify All",
+  title: "Notify All",
   section: "blocking-queue",
+  commitSha: "a81e4914",
+  commitUrl: "https://github.com/lemmy/BlockingQueue/commit/a81e4914",
   description: `Another bugfix: switch from notify() to notifyAll() — always wake up all waiting threads.
 
 ## What Changed
@@ -16,7 +18,11 @@ With notify(), the JVM might wake up a thread that cannot make progress (e.g., w
 
 ## The Fix
 
-notifyAll() ensures every waiting thread gets a chance to check whether it can proceed.`,
+notifyAll() ensures every waiting thread gets a chance to check whether it can proceed.
+
+As a bonus exercise, check if it is necessary to notify all waiting threads in both Put and Get.
+
+Note that this is the proposed solution to the bug in Challenge 14 of the c2 extreme programming wiki. To the best of my knowledge, not a single comment mentions that just one notifyAll suffices. Neither does anybody mention a more elegant fix that has no performance implications (see next step).`,
   spec: `--------------------------- MODULE BlockingQueue ---------------------------
 EXTENDS Naturals, Sequences, FiniteSets
 

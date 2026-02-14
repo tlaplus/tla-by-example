@@ -2,8 +2,10 @@ import { Lesson } from "@/lib/lessons";
 
 const lesson: Lesson = {
   slug: "v13-two-mutexes",
-  title: "v13: Two Mutexes",
+  title: "Two Mutexes",
   section: "blocking-queue",
+  commitSha: "a400b585",
+  commitUrl: "https://github.com/lemmy/BlockingQueue/commit/a400b585",
   description: `The final bugfix: using (logically) two separate mutexes for producers and consumers.
 
 ## What Changed
@@ -20,7 +22,11 @@ With a single mutex/condition variable, notifyAll() wakes up ALL threads — inc
 2. **v12**: Fix with notifyAll() — correct but inefficient
 3. **v13**: Optimize with separate condition variables — correct AND efficient
 
-This is exactly the kind of bug that TLA+ excels at finding: subtle concurrency issues that only manifest in specific interleavings.`,
+This is exactly the kind of bug that TLA+ excels at finding: subtle concurrency issues that only manifest in specific interleavings.
+
+Remove notifyAll and instead introduce two mutexes (one for Producers and one for Consumers). A Consumer will notify the subset of Producers waiting on the Producer mutex (vice versa for a Producer).
+
+The spec does not have to introduce two mutexes. Instead, we can just pick the right thread type from the set of waiting threads. This fix completely solves the bug, but are we fully satisfied yet?`,
   spec: `--------------------------- MODULE BlockingQueue ---------------------------
 EXTENDS Naturals, Sequences, FiniteSets
 

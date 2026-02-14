@@ -2,8 +2,10 @@ import { Lesson } from "@/lib/lessons";
 
 const lesson: Lesson = {
   slug: "v08-inequation",
-  title: "v08: Deadlock-Free Inequation",
+  title: "Deadlock-Free Inequation",
   section: "blocking-queue",
+  commitSha: "8e536cba",
+  commitUrl: "https://github.com/lemmy/BlockingQueue/commit/8e536cba",
   description: `Now we infer the **inequation** under which the system is deadlock-free.
 
 ## What Changed
@@ -12,7 +14,15 @@ The spec and config are extended to systematically check when the deadlock invar
 
 ## Key Insight
 
-TLC finds that the system is deadlock-free when BufCapacity >= (Producers + Consumers - 1). This is a precise characterization discovered through model checking.`,
+TLC finds that the system is deadlock-free when BufCapacity >= (Producers + Consumers - 1). This is a precise characterization discovered through model checking.
+
+We run TLC with the \`-continue\` option to not stop state space exploration after a violation has been found, asking TLC to find all violations. A bit of analysis reveals that BlockingQueue is deadlock-free iff \`2*BufCapacity >= Cardinality(Producers \\\\union Consumers)\`.
+
+![ContinueInequation](/bq-images/ContinueInequation.svg)
+
+Collecting even more data, we can correlate the length of the error trace with the constants:
+
+![TraceLengthCorrelation](/bq-images/TraceLengthCorrelation.svg)`,
   spec: `--------------------------- MODULE BlockingQueue ---------------------------
 EXTENDS Naturals, Sequences, FiniteSets, TLC
 

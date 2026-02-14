@@ -14,11 +14,12 @@ export default function BQPageClient({ lesson, prev, next }: Props) {
   return (
     <LessonLayout lesson={lesson} prev={prev} next={next}>
       <MarkdownContent content={lesson.description} />
-      <div className="mt-6 rounded-lg border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-blue-800">
-        <strong>Credit:</strong> This tutorial is based on the{" "}
+      <hr className="my-6 border-gray-200" />
+      <div className="text-xs text-gray-500">
+        Based on the{" "}
         <a
           href="https://github.com/lemmy/BlockingQueue"
-          className="text-blue-600 hover:underline font-medium"
+          className="text-blue-600 hover:underline"
           target="_blank"
           rel="noopener noreferrer"
         >
@@ -27,13 +28,26 @@ export default function BQPageClient({ lesson, prev, next }: Props) {
         repository by{" "}
         <a
           href="https://github.com/lemmy"
-          className="text-blue-600 hover:underline font-medium"
+          className="text-blue-600 hover:underline"
           target="_blank"
           rel="noopener noreferrer"
         >
           Markus Kuppe
         </a>
         , licensed under MIT.
+        {lesson.commitUrl && (
+          <>
+            {" · "}
+            <a
+              href={lesson.commitUrl}
+              className="text-blue-600 hover:underline"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              View commit on GitHub
+            </a>
+          </>
+        )}
       </div>
     </LessonLayout>
   );

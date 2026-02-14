@@ -2,8 +2,10 @@ import { Lesson } from "@/lib/lessons";
 
 const lesson: Lesson = {
   slug: "v02-state-graph",
-  title: "v02: State Graph (Minimum Config)",
+  title: "State Graph (Minimum Config)",
   section: "blocking-queue",
+  commitSha: "d21cd0fa",
+  commitUrl: "https://github.com/lemmy/BlockingQueue/commit/d21cd0fa",
   description: `This is the first version of the BlockingQueue specification. It models a bounded buffer shared between producers and consumers.
 
 The spec uses a **wait set** pattern: threads that cannot proceed (producer when buffer is full, consumer when buffer is empty) add themselves to a wait set and wait to be notified.
@@ -17,7 +19,13 @@ The spec uses a **wait set** pattern: threads that cannot proceed (producer when
 
 ## What to Look For
 
-Run TLC and observe the state graph. With this minimal configuration, you can trace through every possible state by hand.`,
+Run TLC and observe the state graph. With this minimal configuration, you can trace through every possible state by hand.
+
+## State Graph
+
+The model uses the minimal parameters (1 producer, 1 consumer, and a buffer of size one). When TLC generates the state graph, we can visually verify that no deadlock is possible with this configuration:
+
+![State graph p1c1b1](/bq-images/p1c1b1.svg)`,
   spec: `--------------------------- MODULE BlockingQueue ---------------------------
 (***************************************************************************)
 (* Original problem and spec by Michel Charpentier                         *)

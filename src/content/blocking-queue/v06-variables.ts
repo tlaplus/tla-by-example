@@ -2,8 +2,10 @@ import { Lesson } from "@/lib/lessons";
 
 const lesson: Lesson = {
   slug: "v06-variables",
-  title: "v06: Constants to Variables",
+  title: "Constants to Variables",
   section: "blocking-queue",
+  commitSha: "d48bd86a",
+  commitUrl: "https://github.com/lemmy/BlockingQueue/commit/d48bd86a",
   description: `In this step, we convert some constants into variables to explore a wider range of configurations automatically.
 
 ## What Changed
@@ -12,7 +14,9 @@ Instead of fixing the buffer capacity as a constant, the spec now allows TLC to 
 
 ## Key Insight
 
-Converting constants to variables is a powerful technique: it lets TLC explore configurations you might not have thought to check manually.`,
+Converting constants to variables is a powerful technique: it lets TLC explore configurations you might not have thought to check manually.
+
+As Michel Charpentier points out, BlockingQueue is deadlock-free under some configurations, but model checking is not helpful with finding the underlying mathematical function. However, we can at least ask TLC to find as many data points as possible. This rewrite increases the complete state space to 57254 distinct states, but TLC continues to find the deadlock behavior.`,
   spec: `--------------------------- MODULE BlockingQueue ---------------------------
 EXTENDS Naturals, Sequences, FiniteSets
 

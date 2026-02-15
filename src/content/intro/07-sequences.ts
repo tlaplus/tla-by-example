@@ -6,7 +6,7 @@ const lesson: Lesson = {
   section: "intro",
   description: `# Sequences
 
-Sequences are ordered lists of elements in TLA+. You need to \`EXTENDS Sequences\` to use sequence operators.
+Sequences are ordered lists of elements in TLA+. In TLA+, sequences are simply functions whose domain is \`1..n\`, but because this pattern occurs so frequently, TLA+ provides dedicated syntax for them. You need to \`EXTENDS Sequences\` to use sequence operators.
 
 ## Creating Sequences
 

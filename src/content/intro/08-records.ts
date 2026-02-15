@@ -6,7 +6,7 @@ const lesson: Lesson = {
   section: "intro",
   description: `# Records
 
-Records are like structs or objects - they group named fields together.
+Records are like structs or objects - they group named fields together. In TLA+, records are simply functions whose domain is a set of strings (the field names), but because this pattern occurs so frequently, TLA+ provides dedicated syntax for them.
 
 ## Creating Records
 

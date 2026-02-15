@@ -56,12 +56,13 @@ CONSTANT N
 VARIABLES count, total
 
 TypeOK == /\\ count \\in 0..N
-          /\\ total \\in Nat
+          /\\ total \\in 0..5
 
 Init == /\\ count = 0
         /\\ total = 0
 
 Increment == /\\ count < N
+             /\\ total < 5
              /\\ count' = count + 1
              /\\ total' = total + 1
 

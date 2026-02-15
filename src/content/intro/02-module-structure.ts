@@ -22,7 +22,9 @@ The header line starts with four or more dashes, followed by \`MODULE\`, the mod
 ---- MODULE MySpec ----
 \`\`\`
 
-The module name must match the filename (e.g., \`MySpec.tla\`).
+Any text before the header is ignored by TLA+ tools. This is commonly used to provide a description of the specification, what it models, its purpose, or any assumptions.
+
+The module name **must match the filename**. A module named \`MySpec\` must live in a file called \`MySpec.tla\`. TLC will report an error if they don't match.
 
 ## The Footer
 
@@ -32,7 +34,14 @@ The footer is a line of four or more equals signs:
 ========================
 \`\`\`
 
-Everything after the footer is ignored.
+Everything after the footer is ignored by TLA+ tools. By convention, this space is used to record **modifications and updates** to the spec - a change log of what was modified and why:
+
+\`\`\`
+========================
+Modification History
+* Added Bound invariant to limit state space
+* Initial version with basic counter
+\`\`\`
 
 ## EXTENDS
 
@@ -43,11 +52,11 @@ EXTENDS Naturals, Sequences
 \`\`\`
 
 Common standard modules:
-- **Naturals** — natural numbers and arithmetic (+, -, *, \\div, %)
-- **Integers** — integers (adds negative numbers)
-- **Sequences** — sequence operations (Append, Head, Tail, Len)
-- **FiniteSets** — Cardinality, IsFiniteSet
-- **TLC** — TLC-specific operators (Print, Assert)
+- **Naturals** - natural numbers and arithmetic (+, -, *, \\div, %)
+- **Integers** - integers (adds negative numbers)
+- **Sequences** - sequence operations (Append, Head, Tail, Len)
+- **FiniteSets** - Cardinality, IsFiniteSet
+- **TLC** - TLC-specific operators (Print, Assert)
 
 ## Separator Lines
 
@@ -57,12 +66,14 @@ Inside a module, you can use separator lines (four or more dashes) to visually o
 ----
 \`\`\`
 
-These have no semantic meaning — they're just for readability.
+These have no semantic meaning - they're just for readability.
 
 ## Try It
 
-The spec on the right shows a minimal module structure. Try modifying it and running TLC to see what happens.`,
-  spec: `----------------------------- MODULE MySpec ----------------------------------
+The spec on the right shows a module with text before the header and after the footer. Notice how the module name matches the tab filename. Try modifying it and running TLC to see what happens.`,
+  spec: `A simple counter that increments from 0 up to a bound.
+Demonstrates the basic structure of a TLA+ module.
+----------------------------- MODULE MySpec ----------------------------------
 (***************************************************************************)
 (* A minimal TLA+ module demonstrating the basic structure.                *)
 (***************************************************************************)
@@ -78,7 +89,9 @@ Spec == Init /\\ [][Next]_x
 
 Bound == x < 5
 
-=============================================================================`,
+=============================================================================
+Modification History
+* Initial version with a simple bounded counter`,
   cfg: `INIT Init
 NEXT Next
 INVARIANT Bound

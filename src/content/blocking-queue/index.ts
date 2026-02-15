@@ -1,28 +1,17 @@
-import introduction from "./introduction";
-import stateGraph from "./state-graph";
-import largerConfig from "./larger-config";
-import debugConfig from "./debug-config";
-import safety from "./safety";
-import variables from "./variables";
-import symmetry from "./symmetry";
-import inequation from "./inequation";
-import viewAbstraction from "./view";
-import notifyNondeterministic from "./notify-nondeterministic";
-import notifyAll from "./notify-all";
-import twoMutexes from "./two-mutexes";
+import fs from "fs";
+import path from "path";
 import { Lesson } from "@/lib/lessons";
+import { parseLesson } from "@/lib/parse-lesson";
 
-export const blockingQueueLessons: Lesson[] = [
-  introduction,
-  stateGraph,
-  largerConfig,
-  debugConfig,
-  safety,
-  variables,
-  symmetry,
-  inequation,
-  viewAbstraction,
-  notifyNondeterministic,
-  notifyAll,
-  twoMutexes,
-];
+const dir = path.join(process.cwd(), "src", "content", "blocking-queue");
+
+const mdFiles = fs
+  .readdirSync(dir)
+  .filter((f) => f.endsWith(".md"))
+  .sort();
+
+const mdLessons: Lesson[] = mdFiles.map((f) =>
+  parseLesson(fs.readFileSync(path.join(dir, f), "utf-8"))
+);
+
+export const blockingQueueLessons: Lesson[] = [...mdLessons];

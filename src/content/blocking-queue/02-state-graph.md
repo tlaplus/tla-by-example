@@ -1,12 +1,11 @@
-import { Lesson } from "@/lib/lessons";
-
-const lesson: Lesson = {
-  slug: "state-graph",
-  title: "State Graph (Minimum Config)",
-  section: "blocking-queue",
-  commitSha: "d21cd0fa",
-  commitUrl: "https://github.com/lemmy/BlockingQueue/commit/d21cd0fa",
-  description: `This is the first version of the BlockingQueue specification. It models a bounded buffer shared between producers and consumers.
+---
+slug: state-graph
+title: "State Graph (Minimum Config)"
+section: blocking-queue
+commitSha: "d21cd0fa"
+commitUrl: "https://github.com/lemmy/BlockingQueue/commit/d21cd0fa"
+---
+This is the first version of the BlockingQueue specification. It models a bounded buffer shared between producers and consumers.
 
 The spec uses a **wait set** pattern: threads that cannot proceed (producer when buffer is full, consumer when buffer is empty) add themselves to a wait set and wait to be notified.
 
@@ -25,8 +24,10 @@ Run TLC and observe the state graph. With this minimal configuration, you can tr
 
 The model uses the minimal parameters (1 producer, 1 consumer, and a buffer of size one). When TLC generates the state graph, we can visually verify that no deadlock is possible with this configuration:
 
-![State graph p1c1b1](/bq-images/p1c1b1.svg)`,
-  spec: `--------------------------- MODULE BlockingQueue ---------------------------
+![State graph p1c1b1](/bq-images/p1c1b1.svg)
+
+---TLA_BY_EXAMPLE_SPEC---
+--------------------------- MODULE BlockingQueue ---------------------------
 (***************************************************************************)
 (* Original problem and spec by Michel Charpentier                         *)
 (* http://www.cs.unh.edu/~charpov/programming-tlabuffer.html               *)
@@ -38,64 +39,63 @@ CONSTANTS Producers,   (* the (nonempty) set of producers                       
           BufCapacity  (* the maximum number of messages in the bounded buffer  *)
 
 ASSUME Assumption ==
-       /\\ Producers # {}                      (* at least one producer *)
-       /\\ Consumers # {}                      (* at least one consumer *)
-       /\\ Producers \\intersect Consumers = {} (* no thread is both consumer and producer *)
-       /\\ BufCapacity \\in (Nat \\ {0})         (* buffer capacity is at least 1 *)
+       /\ Producers # {}                      (* at least one producer *)
+       /\ Consumers # {}                      (* at least one consumer *)
+       /\ Producers \intersect Consumers = {} (* no thread is both consumer and producer *)
+       /\ BufCapacity \in (Nat \ {0})         (* buffer capacity is at least 1 *)
        
 -----------------------------------------------------------------------------
 
 VARIABLES buffer, waitSet
 vars == <<buffer, waitSet>>
 
-RunningThreads == (Producers \\cup Consumers) \\ waitSet
+RunningThreads == (Producers \cup Consumers) \ waitSet
 
 (* @see java.lang.Object#notify *)       
 Notify == IF waitSet # {}
-          THEN \\E x \\in waitSet: waitSet' = waitSet \\ {x}
+          THEN \E x \in waitSet: waitSet' = waitSet \ {x}
           ELSE UNCHANGED waitSet
 
 (* @see java.lang.Object#wait *)
-Wait(t) == /\\ waitSet' = waitSet \\cup {t}
-           /\\ UNCHANGED <<buffer>>
+Wait(t) == /\ waitSet' = waitSet \cup {t}
+           /\ UNCHANGED <<buffer>>
            
 -----------------------------------------------------------------------------
 
 Put(t, d) ==
-   \\/ /\\ Len(buffer) < BufCapacity
-      /\\ buffer' = Append(buffer, d)
-      /\\ Notify
-   \\/ /\\ Len(buffer) = BufCapacity
-      /\\ Wait(t)
+   \/ /\ Len(buffer) < BufCapacity
+      /\ buffer' = Append(buffer, d)
+      /\ Notify
+   \/ /\ Len(buffer) = BufCapacity
+      /\ Wait(t)
       
 Get(t) ==
-   \\/ /\\ buffer # <<>>
-      /\\ buffer' = Tail(buffer)
-      /\\ Notify
-   \\/ /\\ buffer = <<>>
-      /\\ Wait(t)
+   \/ /\ buffer # <<>>
+      /\ buffer' = Tail(buffer)
+      /\ Notify
+   \/ /\ buffer = <<>>
+      /\ Wait(t)
 
 -----------------------------------------------------------------------------
 
 (* Initially, the buffer is empty and no thread is waiting. *)
-Init == /\\ buffer = <<>>
-        /\\ waitSet = {}
+Init == /\ buffer = <<>>
+        /\ waitSet = {}
 
 (* Then, pick a thread out of all running threads and have it do its thing. *)
-Next == \\E t \\in RunningThreads: \\/ /\\ t \\in Producers
-                                    /\\ Put(t, t) \\* Add some data to buffer
-                                 \\/ /\\ t \\in Consumers
-                                    /\\ Get(t)
+Next == \E t \in RunningThreads: \/ /\ t \in Producers
+                                    /\ Put(t, t) \* Add some data to buffer
+                                 \/ /\ t \in Consumers
+                                    /\ Get(t)
 
-=============================================================================`,
-  cfg: `\\* SPECIFICATION
+=============================================================================
+
+---TLA_BY_EXAMPLE_CFG---
+\* SPECIFICATION
 CONSTANTS
     BufCapacity = 1
     Producers = {p1}
     Consumers = {c1}
 
 INIT Init
-NEXT Next`,
-};
-
-export default lesson;
+NEXT Next

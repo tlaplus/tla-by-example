@@ -2,7 +2,7 @@ import { Lesson } from "@/lib/lessons";
 
 const lesson: Lesson = {
   slug: "safety",
-  title: "Safety — Detecting Deadlocks",
+  title: "Safety - Detecting Deadlocks",
   section: "blocking-queue",
   commitSha: "ce99d16a",
   commitUrl: "https://github.com/lemmy/BlockingQueue/commit/ce99d16a",

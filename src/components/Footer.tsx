@@ -10,7 +10,7 @@ export default function Footer() {
       >
         Federico Ponzi
       </a>
-      {" — send questions and comments to "}
+      {" - send questions and comments to "}
       <a
         href="mailto:me@fponzi.me"
         className="text-blue-600 hover:underline"

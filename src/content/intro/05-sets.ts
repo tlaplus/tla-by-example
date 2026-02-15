@@ -27,10 +27,10 @@ x \\notin S         \\* x is NOT a member of S
 
 | Operator | Meaning |
 |----------|---------|
-| \`S \\union T\` | Union — elements in S or T |
-| \`S \\intersect T\` | Intersection — elements in both |
-| \`S \\\\ T\` | Set difference — elements in S but not T |
-| \`SUBSET S\` | Power set — all subsets of S |
+| \`S \\union T\` | Union - elements in S or T |
+| \`S \\intersect T\` | Intersection - elements in both |
+| \`S \\\\ T\` | Set difference - elements in S but not T |
+| \`SUBSET S\` | Power set - all subsets of S |
 | \`S \\subseteq T\` | S is a subset of T |
 | \`Cardinality(S)\` | Number of elements (needs FiniteSets) |
 

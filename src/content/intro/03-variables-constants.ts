@@ -43,7 +43,7 @@ TypeOK == /\\ x \\in Nat
           /\\ y \\in 1..N
 \`\`\`
 
-This isn't enforced by TLA+ itself — it's checked by TLC as an invariant. It's useful for catching bugs early.
+This isn't enforced by TLA+ itself - it's checked by TLC as an invariant. It's useful for catching bugs early.
 
 ## Try It
 

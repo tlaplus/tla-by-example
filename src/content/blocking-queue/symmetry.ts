@@ -10,7 +10,7 @@ const lesson: Lesson = {
 
 ## What Changed
 
-The configuration now uses SYMMETRY to tell TLC that individual producer/consumer identities do not matter — only the count matters.
+The configuration now uses SYMMETRY to tell TLC that individual producer/consumer identities do not matter - only the count matters.
 
 ## Why Symmetry Matters
 

@@ -10,7 +10,7 @@ const lesson: Lesson = {
 
 ## What Changed
 
-Only the configuration changed — the spec is the same. This demonstrates the power of model checking: by exploring different parameter values, we can find bugs that do not appear in simpler configurations.
+Only the configuration changed - the spec is the same. This demonstrates the power of model checking: by exploring different parameter values, we can find bugs that do not appear in simpler configurations.
 
 ## Try It
 

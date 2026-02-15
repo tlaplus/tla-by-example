@@ -14,7 +14,7 @@ Previously, the spec assumed a specific thread would be notified. Now it models 
 
 ## The Bug
 
-If we always notify a specific thread, we miss executions where a different thread gets notified — which could lead to deadlock.
+If we always notify a specific thread, we miss executions where a different thread gets notified - which could lead to deadlock.
 
 ## Key Concept
 

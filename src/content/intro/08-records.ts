@@ -6,7 +6,7 @@ const lesson: Lesson = {
   section: "intro",
   description: `# Records
 
-Records are like structs or objects — they group named fields together.
+Records are like structs or objects - they group named fields together.
 
 ## Creating Records
 

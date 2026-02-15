@@ -14,7 +14,7 @@ A VIEW directive is added to the configuration. The view maps each state to an a
 
 ## Why Views Help
 
-The buffer content does not matter for deadlock checking — only its length does. By abstracting the buffer to its length, we dramatically reduce the state space while preserving the properties we care about.
+The buffer content does not matter for deadlock checking - only its length does. By abstracting the buffer to its length, we dramatically reduce the state space while preserving the properties we care about.
 
 We exploit the insight that the order of elements in the (fifo) buffer is irrelevant for the correctness of the algorithm. In other words, we can abstract the buffer into a simple counter of elements. With this abstraction, the state-space for the current config shrinks from 2940 to 1797 distinct states.`,
   spec: `--------------------------- MODULE BlockingQueue ---------------------------

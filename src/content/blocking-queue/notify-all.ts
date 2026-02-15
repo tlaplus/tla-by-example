@@ -6,7 +6,7 @@ const lesson: Lesson = {
   section: "blocking-queue",
   commitSha: "a81e4914",
   commitUrl: "https://github.com/lemmy/BlockingQueue/commit/a81e4914",
-  description: `Another bugfix: switch from notify() to notifyAll() — always wake up all waiting threads.
+  description: `Another bugfix: switch from notify() to notifyAll() - always wake up all waiting threads.
 
 ## What Changed
 
@@ -14,7 +14,7 @@ Instead of non-deterministically notifying one thread, we now notify **all** wai
 
 ## The Lost Wakeup Problem
 
-With notify(), the JVM might wake up a thread that cannot make progress (e.g., waking a producer when the buffer is already full). That thread goes back to waiting, and the actual thread that could make progress is never woken — leading to deadlock.
+With notify(), the JVM might wake up a thread that cannot make progress (e.g., waking a producer when the buffer is already full). That thread goes back to waiting, and the actual thread that could make progress is never woken - leading to deadlock.
 
 ## The Fix
 

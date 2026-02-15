@@ -22,8 +22,8 @@ TLA+ has a rich set of operators. Let's cover the most common ones.
 
 Almost every TLA+ spec follows this pattern:
 
-1. **Init** — defines the initial state (conjunction of assignments)
-2. **Next** — defines all possible transitions (disjunction of actions)
+1. **Init** - defines the initial state (conjunction of assignments)
+2. **Next** - defines all possible transitions (disjunction of actions)
 
 \`\`\`
 Init == /\\ x = 0
@@ -33,8 +33,8 @@ Next == \\/ ActionA
         \\/ ActionB
 \`\`\`
 
-In Init, \`/\\\` means "and" — all conditions must hold.
-In Next, \`\\/\` means "or" — any one action can happen.
+In Init, \`/\\\` means "and" - all conditions must hold.
+In Next, \`\\/\` means "or" - any one action can happen.
 
 ## Actions and Primed Variables
 

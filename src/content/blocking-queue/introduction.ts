@@ -22,7 +22,7 @@ cd BlockingQueue
 java -cp impl/src/ org.kuppe.App
 \`\`\`
 
-This launches the application with the default configuration **p4c3b3** (4 producers, 3 consumers, buffer capacity 3). The application may deadlock — that is the bug we will investigate with TLA+.
+This launches the application with the default configuration **p4c3b3** (4 producers, 3 consumers, buffer capacity 3). The application may deadlock - that is the bug we will investigate with TLA+.
 
 ## Running the C Implementation
 

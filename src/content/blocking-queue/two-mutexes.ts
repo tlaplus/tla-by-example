@@ -14,13 +14,13 @@ Instead of a single wait set for all threads, we separate waiting producers from
 
 ## Why This Matters
 
-With a single mutex/condition variable, notifyAll() wakes up ALL threads — including those that definitely cannot proceed. With separate conditions for "buffer not full" and "buffer not empty," we can be more precise.
+With a single mutex/condition variable, notifyAll() wakes up ALL threads - including those that definitely cannot proceed. With separate conditions for "buffer not full" and "buffer not empty," we can be more precise.
 
 ## Summary of the Bugfix Journey
 
 1. **v11**: Model the real non-deterministic behavior of notify()
-2. **v12**: Fix with notifyAll() — correct but inefficient
-3. **v13**: Optimize with separate condition variables — correct AND efficient
+2. **v12**: Fix with notifyAll() - correct but inefficient
+3. **v13**: Optimize with separate condition variables - correct AND efficient
 
 This is exactly the kind of bug that TLA+ excels at finding: subtle concurrency issues that only manifest in specific interleavings.
 

@@ -13,7 +13,7 @@ export function generateStaticParams() {
 export function generateMetadata({ params }: PageProps) {
   const lesson = introLessons.find((l) => l.slug === params.slug);
   if (!lesson) return {};
-  return { title: `${lesson.title} — TLA+ By Example` };
+  return { title: `${lesson.title} - TLA+ By Example` };
 }
 
 export default function IntroLessonPage({ params }: PageProps) {

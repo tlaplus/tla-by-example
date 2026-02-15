@@ -36,14 +36,14 @@ Constants let you parameterize your spec. For example, you might define a buffer
 
 ## TypeOK Invariant
 
-A common pattern is to define a **type-correctness invariant** called \`TypeOK\`. It specifies the expected types/ranges of all variables:
+TLA+ formulas are **untyped** - there is no built-in type system that restricts what values a variable can hold. A common pattern is to define a **type-correctness invariant** called \`TypeOK\` that specifies the expected types and ranges of all variables:
 
 \`\`\`
 TypeOK == /\\ x \\in Nat
           /\\ y \\in 1..N
 \`\`\`
 
-This isn't enforced by TLA+ itself - it's checked by TLC as an invariant. It's useful for catching bugs early.
+Since TLA+ has no types, \`TypeOK\` is just a formula like any other. TLC checks it as an invariant at every reachable state, making it a useful way to catch bugs early.
 
 ## Try It
 

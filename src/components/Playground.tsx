@@ -1,10 +1,15 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
 import dynamic from "next/dynamic";
 import { initCheerpJ, runTlc, isCheerpJReady } from "@/lib/cheerpj";
 import { tlaplus, tlaCfg } from "@/lib/tlaplus-lang";
 import type { ExtraTab } from "@/lib/lessons";
+
+function extractModuleName(spec: string): string {
+  const match = spec.match(/^-{4,}\s*MODULE\s+(\w+)\s*-{4,}/m);
+  return match ? match[1] : "Spec";
+}
 
 const CodeEditor = dynamic(() => import("@/components/CodeEditor"), { ssr: false });
 
@@ -30,6 +35,8 @@ export default function Playground({
   const [isRunning, setIsRunning] = useState(false);
   const [isReady, setIsReady] = useState(false);
   const [outputOpen, setOutputOpen] = useState(false);
+
+  const moduleName = useMemo(() => extractModuleName(spec), [spec]);
 
   useEffect(() => {
     initCheerpJ()
@@ -82,7 +89,7 @@ export default function Playground({
                 : "border-transparent text-gray-500 hover:text-gray-700"
             }`}
           >
-            {tab === "spec" ? "Spec.tla" : "Spec.cfg"}
+            {tab === "spec" ? `${moduleName}.tla` : `${moduleName}.cfg`}
           </button>
         ))}
         {extraTabs.map((et) => (

@@ -26,6 +26,10 @@ function parseMarkdown(md: string): string {
   html = html.replace(/\*\*(.+?)\*\*/g, '<strong class="font-semibold">$1</strong>');
   html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
 
+  // YouTube embeds: ![youtube](URL)
+  html = html.replace(/!\[youtube\]\((?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]+)[^)]*\)/g,
+    '<div class="my-4 aspect-video"><iframe src="https://www.youtube.com/embed/$1" class="w-full h-full rounded-lg" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>');
+
   // Images (must be before links)
   html = html.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" class="my-4 max-w-full rounded-lg border border-gray-200" />');
 

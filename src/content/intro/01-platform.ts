@@ -29,6 +29,8 @@ A TLA+ specification describes:
 
 The playground on the right has a classic example: the **DieHard** water jugs puzzle from the movie Die Hard 3. The heroes need exactly 4 gallons using a 5-gallon and a 3-gallon jug.
 
+![youtube](https://www.youtube.com/watch?v=m9F0i-1Jys0)
+
 Click **▶ Run TLC** to see TLC find a solution (it will report an invariant violation — which is actually the solution!).
 
 ## Follow Along Locally

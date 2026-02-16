@@ -67,9 +67,20 @@ Inside a module, you can use separator lines (four or more dashes) to visually o
 
 These have no semantic meaning - they're just for readability.
 
+## Printing with TLC
+
+TLC provides `Print(value, expr)` and `PrintT(value)` to output debug information during model checking. `Print` evaluates to `expr` (so you can inline it in expressions), while `PrintT` simply prints and returns `TRUE`.
+
+```
+Next == /\ PrintT(<<"x is", x>>)
+        /\ x' = x + 1
+```
+
+To use these operators, add `EXTENDS TLC` to your module.
+
 ## Try It
 
-The spec on the right shows a module with text before the header and after the footer. Notice how the module name matches the tab filename. Try modifying it and running TLC to see what happens.
+The spec on the right shows a module with text before the header and after the footer. It also uses `PrintT` to print the value of `x` on each step. Notice how the module name matches the tab filename. Try modifying it and running TLC to see what happens.
 
 ---TLA_BY_EXAMPLE_SPEC---
 A simple counter that increments from 0 up to a bound.
@@ -79,13 +90,14 @@ Demonstrates the basic structure of a TLA+ module.
 (* A minimal TLA+ module demonstrating the basic structure.                *)
 (* A block comment is delimited by (* to *)                                *)
 (***************************************************************************)
-EXTENDS Naturals
+EXTENDS Naturals, TLC
 
 VARIABLE x
 
 Init == x = 0
 
-Next == x' = x + 1
+Next == /\ PrintT(<<"x is", x>>)
+        /\ x' = x + 1
 
 Spec == Init /\ [][Next]_x
 

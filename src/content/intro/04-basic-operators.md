@@ -5,17 +5,17 @@ section: intro
 ---
 # Basic Operators
 
-TLA+ has a rich set of operators. Let's cover the most common ones.
+TLA+ has a rich set of operators. Let's cover the most common ones. 
 
 ## Boolean Operators
-
-| Operator | Meaning | ASCII form |
-|----------|---------|------------|
-| `/\` | AND (conjunction) | `/\` |
-| `\/` | OR (disjunction) | `\/` |
-| `~` | NOT (negation) | `~` |
-| `=>` | IMPLIES | `=>` |
-| `<=>` | EQUIVALENCE | `<=>` |
+| Operator | Meaning | Unicode |
+|----------|---------|---------|
+| `/\` | AND (conjunction) | ∧ |
+| `\/` | OR (disjunction) | ∨ |
+| `~` | NOT (negation) | ¬ |
+| `=>` | IMPLIES | ⇒ |
+| `<=>` | EQUIVALENCE | ⟺ |
+TLA+ support both the Ascii version as well as its Unicode equivalent.
 
 ## The Init / Next Pattern
 
@@ -73,8 +73,6 @@ VARIABLE light
 
 TypeOK == light \in {"red", "green", "yellow"}
 
-Init == light = "red"
-
 ToGreen  == /\ light = "red"
             /\ light' = "green"
 
@@ -83,6 +81,9 @@ ToYellow == /\ light = "green"
 
 ToRed    == /\ light = "yellow"
             /\ light' = "red"
+
+
+Init == light = "red"
 
 Next == \/ ToGreen
         \/ ToYellow

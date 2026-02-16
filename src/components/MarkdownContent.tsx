@@ -9,13 +9,16 @@ interface MarkdownContentProps {
 function parseMarkdown(md: string): string {
   let html = md;
 
-  // Code blocks (```)
+  // Code blocks (```) - extract to placeholders to protect from further processing
+  const codeBlocks: string[] = [];
   html = html.replace(/```([a-z]*)\n([\s\S]*?)```/g, (_match, _lang, code) => {
-    return `<pre class="bg-gray-100 border border-gray-200 rounded-lg p-4 overflow-x-auto text-sm"><code>${escapeHtml(code.trim())}</code></pre>`;
+    const placeholder = `<!--codeblock-${codeBlocks.length}-->`;
+    codeBlocks.push(`<pre class="bg-gray-100 border border-gray-200 rounded-lg p-4 overflow-x-auto text-sm"><code>${escapeHtml(code.trim())}</code></pre>`);
+    return placeholder;
   });
 
   // Inline code
-  html = html.replace(/`([^`]+)`/g, '<code class="bg-gray-100 px-1.5 py-0.5 rounded text-sm font-mono text-gray-800">$1</code>');
+  html = html.replace(/`([^`]+)`/g, (_match, code) => `<code class="bg-gray-100 px-1.5 py-0.5 rounded text-sm font-mono text-gray-800">${escapeHtml(code)}</code>`);
 
   // Headers
   html = html.replace(/^### (.+)$/gm, '<h3 class="text-lg font-semibold text-gray-900 mt-6 mb-2">$1</h3>');
@@ -40,18 +43,19 @@ function parseMarkdown(md: string): string {
   html = html.replace(/^\|(.+)\|$/gm, (match) => {
     const cells = match.split('|').filter(c => c.trim());
     if (cells.every(c => /^[\s-:]+$/.test(c))) {
-      return ''; // separator row
+      return '<!-- table-separator -->'; // separator row placeholder to keep rows consecutive
     }
-    const isHeader = false; // simplified
-    const tag = isHeader ? 'th' : 'td';
+    const tag = 'td';
     const cellsHtml = cells.map(c =>
       `<${tag} class="border border-gray-200 px-3 py-2 text-sm">${c.trim()}</${tag}>`
     ).join('');
     return `<tr>${cellsHtml}</tr>`;
   });
-  // Wrap consecutive tr elements in table
-  html = html.replace(/((?:<tr>.*<\/tr>\n?)+)/g,
-    '<div class="overflow-x-auto my-4"><table class="border-collapse border border-gray-200 w-full">$1</table></div>');
+  // Wrap consecutive tr elements in table (skip separator placeholders)
+  html = html.replace(/((?:(?:<tr>.*<\/tr>|<!-- table-separator -->)\n?)+)/g, (match) => {
+    const cleaned = match.replace(/<!-- table-separator -->\n?/g, '');
+    return `<div class="overflow-x-auto my-4"><table class="border-collapse border border-gray-200 w-full">${cleaned}</table></div>`;
+  });
 
   // Unordered lists
   html = html.replace(/^- (.+)$/gm, '<li class="ml-4 list-disc text-gray-700">$1</li>');
@@ -90,7 +94,13 @@ function parseMarkdown(md: string): string {
   }
   if (inParagraph) result.push('</p>');
 
-  return result.join('\n');
+  // Restore code blocks from placeholders
+  let output = result.join('\n');
+  codeBlocks.forEach((block, i) => {
+    output = output.replace(`<!--codeblock-${i}-->`, block);
+  });
+
+  return output;
 }
 
 function escapeHtml(s: string): string {

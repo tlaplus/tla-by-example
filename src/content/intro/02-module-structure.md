@@ -77,6 +77,7 @@ Demonstrates the basic structure of a TLA+ module.
 ----------------------------- MODULE MySpec ----------------------------------
 (***************************************************************************)
 (* A minimal TLA+ module demonstrating the basic structure.                *)
+(* A block comment is delimited by (* to *)                                *)
 (***************************************************************************)
 EXTENDS Naturals
 
@@ -88,6 +89,7 @@ Next == x' = x + 1
 
 Spec == Init /\ [][Next]_x
 
+\* This is an inline comment
 Bound == x < 5
 
 =============================================================================

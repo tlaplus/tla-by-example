@@ -7,31 +7,36 @@ section: intro
 
 Sets are one of the most fundamental data structures in TLA+. Unlike programming languages, TLA+ is built on set theory.
 
-## Set Literals
+For finite set operations like `Cardinality` and `IsFiniteSet`, TLA+ provides the [`FiniteSets`](https://github.com/tlaplus/tlaplus/blob/master/tlatools/org.lamport.tlatools/src/tla2sany/StandardModules/FiniteSets.tla) standard module.
 
-```
-{1, 2, 3}          \* a set of numbers
-{"a", "b", "c"}    \* a set of strings
-{}                  \* the empty set
-```
+## Set Literals and Membership
 
-## Set Membership
-
-```
-x \in S            \* x is a member of S
-x \notin S         \* x is NOT a member of S
-```
+| Syntax | Meaning | Unicode |
+|--------|---------|---------|
+| `{1, 2, 3}` | A set of numbers | |
+| `{"a", "b", "c"}` | A set of strings | |
+| `{}` | The empty set | |
+| `x \in S` | x is a member of S | `x ∈ S` |
+| `x \notin S` | x is NOT a member of S | `x ∉ S` |
 
 ## Set Operators
 
+| Operator | Meaning | Unicode |
+|----------|---------|---------|
+| `S \union T` | Union - elements in S or T | `S ∪ T` |
+| `S \intersect T` | Intersection - elements in both | `S ∩ T` |
+| `S \ T` | Set difference - elements in S but not T | |
+| `SUBSET S` | Power set - all subsets of S | |
+| `S \subseteq T` | S is a subset of T | `S ⊆ T` |
+
+## FiniteSets Module
+
+To use these operators, add `EXTENDS FiniteSets` to your module.
+
 | Operator | Meaning |
 |----------|---------|
-| `S \union T` | Union - elements in S or T |
-| `S \intersect T` | Intersection - elements in both |
-| `S \ T` | Set difference - elements in S but not T |
-| `SUBSET S` | Power set - all subsets of S |
-| `S \subseteq T` | S is a subset of T |
-| `Cardinality(S)` | Number of elements (needs FiniteSets) |
+| `IsFiniteSet(S)` | TRUE if S is a finite set |
+| `Cardinality(S)` | Number of elements in a finite set S |
 
 ## Set Comprehension (Filtering)
 

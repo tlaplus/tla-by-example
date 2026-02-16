@@ -2,8 +2,8 @@ import { introLessons } from "@/content/intro";
 import { blockingQueueLessons } from "@/content/blocking-queue";
 
 describe("Lesson data", () => {
-  it("has 9 intro lessons", () => {
-    expect(introLessons).toHaveLength(9);
+  it("has 10 intro lessons", () => {
+    expect(introLessons).toHaveLength(10);
   });
 
   it("has 12 blocking queue lessons", () => {
@@ -23,6 +23,8 @@ describe("Lesson data", () => {
   it("all lessons have non-empty spec and cfg", () => {
     const allLessons = [...introLessons, ...blockingQueueLessons];
     for (const lesson of allLessons) {
+      // tla-intuition uses an animation instead of a spec/cfg playground
+      if (lesson.slug === "tla-intuition") continue;
       expect(lesson.spec.length).toBeGreaterThan(0);
       expect(lesson.cfg.length).toBeGreaterThan(0);
     }

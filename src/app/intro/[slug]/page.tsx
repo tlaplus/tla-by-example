@@ -7,7 +7,10 @@ interface PageProps {
 }
 
 export function generateStaticParams() {
-  return introLessons.map((l) => ({ slug: l.slug }));
+  // tla-intuition has a dedicated route, exclude from dynamic params
+  return introLessons
+    .filter((l) => l.slug !== "tla-intuition")
+    .map((l) => ({ slug: l.slug }));
 }
 
 export function generateMetadata({ params }: PageProps) {

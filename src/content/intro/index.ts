@@ -5,10 +5,18 @@ import { parseLesson } from "@/lib/parse-lesson";
 
 const dir = path.join(process.cwd(), "src", "content", "intro");
 
-const mdFiles = fs
-  .readdirSync(dir)
-  .filter((f) => f.endsWith(".md"))
-  .sort();
+const mdFiles = [
+  "platform.md",
+  "tla-intuition.md",
+  "module-structure.md",
+  "variables-constants.md",
+  "basic-operators.md",
+  "sets.md",
+  "functions.md",
+  "sequences.md",
+  "records.md",
+  "tlc-config.md",
+];
 
 const mdLessons: Lesson[] = mdFiles.map((f) =>
   parseLesson(fs.readFileSync(path.join(dir, f), "utf-8"))

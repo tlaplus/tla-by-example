@@ -41,7 +41,7 @@ NotSolved == big # 4
 =============================================================================`;
 
 export function generateMetadata() {
-  return { title: "The TLA+ Intuition - TLA+ By Example" };
+  return { title: "The TLA+ / TLC Intuition - TLA+ By Example" };
 }
 
 export default function TlaIntuitionPage() {

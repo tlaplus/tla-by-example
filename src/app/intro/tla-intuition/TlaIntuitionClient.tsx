@@ -217,7 +217,7 @@ export default function TlaIntuitionClient({ description, spec, prev, next }: Pr
 
   const current: LessonNavInfo = {
     slug: "tla-intuition",
-    title: "The TLA+ Intuition",
+    title: "The TLA+ / TLC Intuition",
     section: "intro",
   };
 
@@ -263,7 +263,7 @@ export default function TlaIntuitionClient({ description, spec, prev, next }: Pr
           <div className="max-w-none px-8 py-6 prose prose-sm prose-gray">
             {/* Phase 0: Intro + spec */}
             <h1 className="text-2xl font-bold text-gray-900 mt-4 mb-4">
-              The TLA+ Intuition
+              The TLA+ / TLC Intuition
             </h1>
             <p className="text-gray-700 leading-relaxed mb-3">
               Before diving into TLA+ syntax, let&apos;s build an intuition for

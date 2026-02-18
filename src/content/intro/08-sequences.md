@@ -5,35 +5,32 @@ section: intro
 ---
 # Sequences
 
-Sequences are ordered lists of elements in TLA+. In TLA+, sequences are simply functions whose domain is `1..n`, but because this pattern occurs so frequently, TLA+ provides dedicated syntax for them. You need to `EXTENDS Sequences` to use sequence operators.
+Sequences are ordered lists of elements in TLA+. In TLA+, sequences are simply functions whose domain is `1..n`, but because this pattern occurs so frequently, TLA+ provides dedicated syntax for them.
 
-## Creating Sequences
+For sequence operators, TLA+ provides the [`Sequences`](https://github.com/tlaplus/tlaplus/blob/master/tlatools/org.lamport.tlatools/src/tla2sany/StandardModules/Sequences.tla) standard module. Add `EXTENDS Sequences` to your module to use them.
 
-```
-<<1, 2, 3>>         \* a sequence of three elements
-<<>>                 \* the empty sequence
-<< "hello" >>       \* a sequence with one element
-```
+## Sequence Literals and Access
 
-## Accessing Elements
-
-Sequences are 1-indexed:
-
-```
-s[1]                 \* first element
-s[Len(s)]            \* last element
-```
+| Syntax | Meaning |
+|--------|---------|
+| `<<1, 2, 3>>` | A sequence of three elements |
+| `<<>>` | The empty sequence |
+| `<<"hello">>` | A sequence with one element |
+| `s[1]` | First element (1-indexed) |
+| `s[Len(s)]` | Last element |
 
 ## Sequence Operators
 
-| Operator | Meaning |
-|----------|---------|
-| `Len(s)` | Length of s |
-| `Head(s)` | First element |
-| `Tail(s)` | All elements except the first |
-| `Append(s, e)` | Add e to the end |
-| `s \o t` | Concatenate sequences s and t |
-| `SubSeq(s, m, n)` | Subsequence from index m to n |
+| Operator | Meaning | Unicode |
+|----------|---------|---------|
+| `Seq(S)` | The set of all finite sequences of elements in S | |
+| `Len(s)` | Length of sequence s | |
+| `Head(s)` | First element of s | |
+| `Tail(s)` | All elements except the first | |
+| `Append(s, e)` | Add e to the end of s | |
+| `s \o t` | Concatenate sequences s and t | `s ∘ t` |
+| `SubSeq(s, m, n)` | Subsequence from index m to n | |
+| `SelectSeq(s, Test)` | Subsequence of elements where Test is TRUE | |
 
 ## Sequences as Functions
 

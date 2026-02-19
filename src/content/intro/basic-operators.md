@@ -15,7 +15,7 @@ TLA+ has a rich set of operators. Let's cover the most common ones.
 | `~` | NOT (negation) | ¬ |
 | `=>` | IMPLIES | ⇒ |
 | `<=>` | EQUIVALENCE | ⟺ |
-TLA+ support both the Ascii version as well as its Unicode equivalent.
+TLA+ supports both the ASCII version as well as its Unicode equivalent.
 
 ## The Init / Next Pattern
 

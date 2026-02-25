@@ -1,11 +1,7 @@
 name: CD
 
 on:
-  workflow_run:
-    workflows: ["CI"]
-    branches: [main]
-    types:
-      - completed
+  workflow_dispatch:
 
 permissions:
   id-token: write
@@ -14,7 +10,7 @@ permissions:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ false }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4

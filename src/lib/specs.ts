@@ -1,7 +1,12 @@
 import fs from "fs";
 import path from "path";
 
-const EXAMPLES_DIR = path.resolve(process.cwd(), "../Examples/specifications");
+// Look for Examples as sibling (local dev) or inside workspace (CI)
+const EXAMPLES_DIR = fs.existsSync(
+  path.resolve(process.cwd(), "../Examples/specifications")
+)
+  ? path.resolve(process.cwd(), "../Examples/specifications")
+  : path.resolve(process.cwd(), "Examples/specifications");
 
 interface ManifestModel {
   path: string;

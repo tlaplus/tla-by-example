@@ -1,22 +1,22 @@
 import Link from "next/link";
-import type { LessonNavInfo } from "@/lib/lessons";
+
+export interface BreadcrumbItem {
+  label: string;
+  href?: string;
+}
+
+export interface NavLink {
+  label: string;
+  href: string;
+}
 
 interface NavbarProps {
-  current: LessonNavInfo;
-  prev?: LessonNavInfo;
-  next?: LessonNavInfo;
+  breadcrumbs: BreadcrumbItem[];
+  prev?: NavLink;
+  next?: NavLink;
 }
 
-function sectionPath(lesson: LessonNavInfo): string {
-  return lesson.section === "intro"
-    ? `/intro/${lesson.slug}`
-    : `/blocking-queue/${lesson.slug}`;
-}
-
-export default function Navbar({ current, prev, next }: NavbarProps) {
-  const sectionLabel =
-    current.section === "intro" ? "How to Write TLA+" : "BlockingQueue Tutorial";
-
+export default function Navbar({ breadcrumbs, prev, next }: NavbarProps) {
   return (
     <nav className="flex items-center justify-between border-b border-gray-200 bg-white px-4 py-3">
       <div className="flex items-center gap-3">
@@ -26,31 +26,44 @@ export default function Navbar({ current, prev, next }: NavbarProps) {
         >
           TLA+ By Example
         </Link>
-        <span className="text-gray-300">/</span>
-        <span className="text-sm text-gray-500">{sectionLabel}</span>
-        <span className="text-gray-300">/</span>
-        <span className="text-sm font-medium text-gray-700">{current.title}</span>
+        {breadcrumbs.map((crumb, i) => (
+          <span key={i} className="contents">
+            <span className="text-gray-300">/</span>
+            {crumb.href ? (
+              <Link
+                href={crumb.href}
+                className="text-sm text-gray-500 hover:text-blue-600 transition-colors"
+              >
+                {crumb.label}
+              </Link>
+            ) : (
+              <span className="text-sm font-medium text-gray-700">{crumb.label}</span>
+            )}
+          </span>
+        ))}
       </div>
-      <div className="flex items-center gap-2">
-        {prev ? (
-          <Link
-            href={sectionPath(prev)}
-            className="rounded border border-gray-300 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-          >
-            ← {prev.title}
-          </Link>
-        ) : (
-          <span />
-        )}
-        {next && (
-          <Link
-            href={sectionPath(next)}
-            className="rounded bg-blue-600 px-3 py-1.5 text-sm text-white hover:bg-blue-700 transition-colors"
-          >
-            {next.title} →
-          </Link>
-        )}
-      </div>
+      {(prev || next) && (
+        <div className="flex items-center gap-2">
+          {prev ? (
+            <Link
+              href={prev.href}
+              className="rounded border border-gray-300 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+            >
+              ← {prev.label}
+            </Link>
+          ) : (
+            <span />
+          )}
+          {next && (
+            <Link
+              href={next.href}
+              className="rounded bg-blue-600 px-3 py-1.5 text-sm text-white hover:bg-blue-700 transition-colors"
+            >
+              {next.label} →
+            </Link>
+          )}
+        </div>
+      )}
     </nav>
   );
 }

@@ -2,8 +2,11 @@ import Link from "next/link";
 import Footer from "@/components/Footer";
 import { introLessons } from "@/content/intro";
 import { blockingQueueLessons } from "@/content/blocking-queue";
+import { getBeginnerSpecs } from "@/lib/specs";
 
 export default function Home() {
+  const beginnerSpecs = getBeginnerSpecs();
+
   return (
     <div className="min-h-screen flex flex-col">
       {/* Hero */}
@@ -88,6 +91,33 @@ export default function Home() {
                     </h3>
                   </div>
                 </div>
+              </Link>
+            ))}
+          </div>
+        </section>
+
+        {/* Community Specifications */}
+        <section id="specifications" className="mt-16">
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+            Community Specifications
+          </h2>
+          <p className="text-gray-600 mb-6">
+            Beginner-friendly TLA+ specifications from the community. Browse the source,
+            read the explanation, and explore the models.
+          </p>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {beginnerSpecs.map((spec) => (
+              <Link
+                key={spec.slug}
+                href={`/specs/${spec.slug}`}
+                className="group rounded-lg border border-gray-200 p-4 hover:border-purple-300 hover:bg-purple-50/50 transition-colors"
+              >
+                <h3 className="font-medium text-gray-900 group-hover:text-purple-700">
+                  {spec.name}
+                </h3>
+                <p className="mt-1 text-xs text-gray-500">
+                  {spec.authors.join(", ")}
+                </p>
               </Link>
             ))}
           </div>

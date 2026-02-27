@@ -252,7 +252,14 @@ export default function TlaIntuitionClient({ description, spec, prev, next }: Pr
 
   return (
     <div className="flex flex-col h-screen">
-      <Navbar current={current} prev={prev} next={next} />
+      <Navbar
+        breadcrumbs={[
+          { label: "How to Write TLA+" },
+          { label: current.title },
+        ]}
+        prev={prev ? { label: prev.title, href: `/intro/${prev.slug}` } : undefined}
+        next={next ? { label: next.title, href: `/intro/${next.slug}` } : undefined}
+      />
 
       <div className="flex flex-1 min-h-0">
         {/* Left: narrative */}

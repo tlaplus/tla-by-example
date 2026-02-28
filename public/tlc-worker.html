@@ -8,6 +8,7 @@
 <body>
 <script>
   let TlcRunnerClass = null;
+  let cheerpjLib = null;
   let initError = null;
   let capturing = false;
 
@@ -36,6 +37,7 @@
       // Resolve jar path relative to this HTML file's location
       const jarPath = `/app${location.pathname.replace(/\/[^/]*$/, '')}/tlaplus-web-cheerpj.jar`;
       const lib = await cheerpjRunLibrary(jarPath);
+      cheerpjLib = lib;
       TlcRunnerClass = await lib.me.fponzi.tlaplusweb.TlcRunner;
       parent.postMessage({ type: "ready" }, "*");
     } catch (e) {
@@ -54,7 +56,18 @@
         return;
       }
       try {
-        const { spec, cfg, workers, checkDeadlock } = event.data;
+        const { spec, cfg, workers, checkDeadlock, extraModules } = event.data;
+        // Write extra .tla modules to /files/ so TLC can resolve EXTENDS
+        if (extraModules && extraModules.length > 0 && cheerpjLib) {
+          const JFile = await cheerpjLib.java.io.File;
+          const JFileWriter = await cheerpjLib.java.io.FileWriter;
+          for (const mod of extraModules) {
+            const f = await new JFile("/files/" + mod.name);
+            const fw = await new JFileWriter(f);
+            await fw.write(mod.content);
+            await fw.close();
+          }
+        }
         capturing = true;
         const result = await TlcRunnerClass.run(spec, cfg, workers, checkDeadlock);
         capturing = false;

@@ -1,13 +1,27 @@
 "use client";
 
-import { useState, useCallback } from "react";
 import dynamic from "next/dynamic";
 import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
-import ResizableDivider from "@/components/ResizableDivider";
+import SplitLayout from "@/components/SplitLayout";
 import type { Lesson, LessonNavInfo } from "@/lib/lessons";
+import type { PlaygroundTab, PlaygroundTlcConfig } from "@/components/Playground";
 
 const Playground = dynamic(() => import("@/components/Playground"), { ssr: false });
+
+function sectionPath(lesson: LessonNavInfo): string {
+  return lesson.section === "intro"
+    ? `/intro/${lesson.slug}`
+    : `/blocking-queue/${lesson.slug}`;
+}
+
+function sectionLabel(section: string): string {
+  return section === "intro" ? "How to Write TLA+" : "BlockingQueue Tutorial";
+}
+
+function extractModuleName(spec: string): string {
+  const match = spec.match(/^-{4,}\s*MODULE\s+(\w+)\s*-{4,}/m);
+  return match ? match[1] : "Spec";
+}
 
 interface LessonLayoutProps {
   lesson: Lesson;
@@ -17,51 +31,38 @@ interface LessonLayoutProps {
 }
 
 export default function LessonLayout({ lesson, prev, next, children }: LessonLayoutProps) {
-  const [explanationWidth, setExplanationWidth] = useState(45);
+  const moduleName = extractModuleName(lesson.spec);
+  const lessonTabs = lesson.tabs ?? ["spec", "cfg"];
 
-  const handleResize = useCallback((delta: number) => {
-    setExplanationWidth((w) => {
-      const containerWidth = window.innerWidth;
-      const deltaPercent = (delta / containerWidth) * 100;
-      return Math.max(25, Math.min(65, w + deltaPercent));
-    });
-  }, []);
+  const tabs: PlaygroundTab[] = [];
+  if (lessonTabs.includes("spec")) {
+    tabs.push({ id: "spec", label: `${moduleName}.tla`, initialContent: lesson.spec, lang: "tla" });
+  }
+  if (lessonTabs.includes("cfg")) {
+    tabs.push({ id: "cfg", label: `${moduleName}.cfg`, initialContent: lesson.cfg, lang: "cfg" });
+  }
+  for (const et of lesson.extraTabs ?? []) {
+    tabs.push({ id: `extra-${et.label}`, label: et.label, initialContent: et.content, lang: "text" });
+  }
 
-  const current: LessonNavInfo = {
-    slug: lesson.slug,
-    title: lesson.title,
-    section: lesson.section,
-  };
+  const tlcConfigs: PlaygroundTlcConfig[] = (lessonTabs.includes("spec") && lessonTabs.includes("cfg"))
+    ? [{ label: `${moduleName}.cfg`, specTabId: "spec", cfgTabId: "cfg" }]
+    : [];
 
   return (
-    <div className="flex flex-col h-screen">
-      <Navbar current={current} prev={prev} next={next} />
-
-      <div className="flex flex-1 min-h-0">
-        {/* Left: explanation */}
-        <div
-          className="overflow-y-auto bg-white"
-          style={{ width: `${explanationWidth}%` }}
-        >
-          <div className="max-w-none px-8 py-6 prose prose-sm prose-gray">
-            {children}
-          </div>
-        </div>
-
-        <ResizableDivider direction="horizontal" onResize={handleResize} />
-
-        {/* Right: playground */}
-        <div className="flex-1 min-w-0">
-          <Playground
-            initialSpec={lesson.spec}
-            initialCfg={lesson.cfg}
-            tabs={lesson.tabs}
-            extraTabs={lesson.extraTabs}
-          />
-        </div>
-      </div>
-
-      <Footer />
-    </div>
+    <SplitLayout
+      navbar={
+        <Navbar
+          breadcrumbs={[
+            { label: sectionLabel(lesson.section) },
+            { label: lesson.title },
+          ]}
+          prev={prev ? { label: prev.title, href: sectionPath(prev) } : undefined}
+          next={next ? { label: next.title, href: sectionPath(next) } : undefined}
+        />
+      }
+      left={children}
+      right={<Playground tabs={tabs} tlcConfigs={tlcConfigs} />}
+    />
   );
 }

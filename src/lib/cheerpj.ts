@@ -78,11 +78,17 @@ export function initCheerpJ(): Promise<void> {
   return initPromise;
 }
 
+export interface ExtraModule {
+  name: string;
+  content: string;
+}
+
 export async function runTlc(
   spec: string,
   cfg: string,
   options: TlcOptions,
-  onProgress?: (line: string) => void
+  onProgress?: (line: string) => void,
+  extraModules?: ExtraModule[],
 ): Promise<string> {
   if (!iframeReady || !iframe?.contentWindow) {
     throw new Error("CheerpJ not initialized. Call initCheerpJ() first.");
@@ -99,6 +105,7 @@ export async function runTlc(
       cfg,
       workers: options.workers,
       checkDeadlock: options.checkDeadlock,
+      extraModules: extraModules || [],
     }, "*");
   });
 

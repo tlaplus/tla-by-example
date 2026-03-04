@@ -43,7 +43,7 @@ jobs:
 
       - name: Build static site
         env:
-          NEXT_PUBLIC_BASE_PATH: /tla-by-example
+          NEXT_PUBLIC_BASE_PATH: ""
         run: npm run build
 
       - name: Disable Jekyll processing

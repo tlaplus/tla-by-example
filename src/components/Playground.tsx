@@ -6,6 +6,7 @@ import { tlaplus, tlaCfg } from "@/lib/tlaplus-lang";
 import { useTlcRunner } from "@/lib/useTlcRunner";
 import RunTlcButton from "@/components/RunTlcButton";
 import TlcOutputPanel from "@/components/TlcOutputPanel";
+import { buildCommand, buildPayload, CODESPACES_URL } from "@/lib/vscode-handoff";
 
 const CodeEditor = dynamic(() => import("@/components/CodeEditor"), { ssr: false });
 
@@ -27,11 +28,14 @@ export interface PlaygroundTlcConfig {
 interface PlaygroundProps {
   tabs: PlaygroundTab[];
   tlcConfigs?: PlaygroundTlcConfig[];
+  /** Enables "Run in VS Code"; folder under playground/ in the codespace. */
+  vscodeDir?: string;
 }
 
-export default function Playground({ tabs, tlcConfigs = [] }: PlaygroundProps) {
+export default function Playground({ tabs, tlcConfigs = [], vscodeDir }: PlaygroundProps) {
   const [activeTabId, setActiveTabId] = useState(tabs[0]?.id ?? "");
   const [showConfigPicker, setShowConfigPicker] = useState(false);
+  const [handoffCommand, setHandoffCommand] = useState<string | null>(null);
 
   // Editable content state per tab
   const [tabContents, setTabContents] = useState<Record<string, string>>(() => {
@@ -65,6 +69,29 @@ export default function Playground({ tabs, tlcConfigs = [] }: PlaygroundProps) {
     },
     [tabContents, tabs, runner],
   );
+
+  // Copy the current spec/cfg as a terminal command and open the codespace.
+  // Both happen synchronously in the click handler, while the page still has
+  // focus and user activation (needed for the clipboard and the new tab).
+  const handleVsCodeClick = useCallback(() => {
+    const config = tlcConfigs[defaultIdx];
+    if (!config || !vscodeDir) return;
+    const file = (id: string) => ({
+      name: tabs.find((t) => t.id === id)?.label ?? id,
+      content: tabContents[id] ?? "",
+    });
+    const command = buildCommand(
+      buildPayload(
+        vscodeDir,
+        file(config.specTabId),
+        file(config.cfgTabId),
+        (config.extraModuleTabIds ?? []).map(file),
+      ),
+    );
+    navigator.clipboard?.writeText(command).catch(() => {});
+    window.open(CODESPACES_URL, "_blank", "noopener");
+    setHandoffCommand(command);
+  }, [tlcConfigs, defaultIdx, vscodeDir, tabs, tabContents]);
 
   const handleRunClick = useCallback(() => {
     if (tlcConfigs.length === 1) {
@@ -100,7 +127,16 @@ export default function Playground({ tabs, tlcConfigs = [] }: PlaygroundProps) {
           </button>
         ))}
         {hasConfigs && (
-          <div className="ml-auto pr-2 relative">
+          <div className="ml-auto pr-2 relative flex items-center gap-2">
+            {vscodeDir && (
+              <button
+                onClick={handleVsCodeClick}
+                title="Model-check this spec with the full TLA+ tooling in VS Code on GitHub Codespaces"
+                className="rounded border border-blue-600 px-3 py-1.5 text-sm font-semibold text-blue-600 hover:bg-blue-50 transition-colors whitespace-nowrap"
+              >
+                Run in VS Code
+              </button>
+            )}
             <RunTlcButton
               isRunning={runner.isRunning}
               isReady={runner.isReady}
@@ -133,6 +169,32 @@ export default function Playground({ tabs, tlcConfigs = [] }: PlaygroundProps) {
           </div>
         )}
       </div>
+
+      {handoffCommand && (
+        <div className="border-b border-blue-200 bg-blue-50 px-4 py-2 text-sm text-blue-900">
+          <div className="flex items-start justify-between gap-2">
+            <p>
+              Command copied. In the codespace that just opened, wait for setup to finish, then paste it
+              into the <strong>Terminal</strong> (open it with <kbd>Ctrl</kbd>+<kbd>`</kbd>) and press
+              Enter: your spec opens in the editor and TLC runs.
+            </p>
+            <button
+              onClick={() => setHandoffCommand(null)}
+              aria-label="Dismiss"
+              className="text-blue-400 hover:text-blue-700"
+            >
+              ✕
+            </button>
+          </div>
+          <input
+            readOnly
+            value={handoffCommand}
+            onFocus={(e) => e.currentTarget.select()}
+            aria-label="Command to paste into the codespace terminal"
+            className="mt-1 w-full rounded border border-blue-200 bg-white px-2 py-1 font-mono text-xs text-gray-700"
+          />
+        </div>
+      )}
 
       {/* Editor area */}
       <div className="flex-1 relative min-h-0">

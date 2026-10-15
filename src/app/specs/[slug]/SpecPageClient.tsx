@@ -71,7 +71,7 @@ export default function SpecPageClient({ name, readme, modules }: SpecPageClient
         />
       }
       left={<MarkdownContent content={readme} />}
-      right={<Playground tabs={tabs} tlcConfigs={tlcConfigs} />}
+      right={<Playground tabs={tabs} tlcConfigs={tlcConfigs} vscodeDir={`specs/${name}`} />}
     />
   );
 }

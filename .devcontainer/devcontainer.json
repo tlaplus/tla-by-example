@@ -1,0 +1,29 @@
+// Full TLA+ tooling in the browser via GitHub Codespaces: the TLA+ VS Code
+// extension with TLC (needs Java), the lessons exported as .tla/.cfg files,
+// and the tlaplus/Examples specifications used by the /specs pages.
+{
+  "name": "TLA+ By Example",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+  "features": {
+    "ghcr.io/devcontainers/features/java:1": { "version": "21" },
+    // >= 22.18 so scripts/export-lessons.mjs can import the TypeScript lesson parser.
+    "ghcr.io/devcontainers/features/node:1": { "version": "24" }
+  },
+  "hostRequirements": { "cpus": 2 },
+  "postCreateCommand": "npm ci && npm run export-lessons && git clone --depth 1 https://github.com/tlaplus/Examples Examples",
+  "forwardPorts": [3000],
+  "portsAttributes": { "3000": { "label": "tla-by-example (npm run dev)" } },
+  "customizations": {
+    "vscode": {
+      "extensions": ["tlaplus.vscode-ide"],
+      "settings": {
+        "tlaplus.java.options": "-XX:+UseParallelGC",
+        // Show the welcome page rendered instead of as Markdown source.
+        "workbench.editorAssociations": { "**/.devcontainer/WELCOME.md": "vscode.markdown.preview.editor" }
+      }
+    },
+    "codespaces": {
+      "openFiles": [".devcontainer/WELCOME.md"]
+    }
+  }
+}

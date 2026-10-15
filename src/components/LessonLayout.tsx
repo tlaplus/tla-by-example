@@ -62,7 +62,7 @@ export default function LessonLayout({ lesson, prev, next, children }: LessonLay
         />
       }
       left={children}
-      right={<Playground tabs={tabs} tlcConfigs={tlcConfigs} />}
+      right={<Playground tabs={tabs} tlcConfigs={tlcConfigs} vscodeDir={`${lesson.section}/${lesson.slug}`} />}
     />
   );
 }
